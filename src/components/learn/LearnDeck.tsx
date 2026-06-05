@@ -56,14 +56,19 @@ export function LearnDeck() {
   const screenRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  /** Scroll a screen index into view by scrolling the DECK itself (not the
-   *  window). No `behavior` arg → honours the deck's CSS scroll-behavior, which
-   *  the global reduced-motion rule flips to `auto`. */
+  /** Scroll a screen index into view by scrolling the DECK to the target snap
+   *  point. `behavior:"smooth"` is unreliable on a scroll-snap-mandatory container
+   *  and tweening scrollTop fights the snap; an INSTANT scroll to an exact snap
+   *  point is the one thing that always lands. (Mouse wheel still animates via the
+   *  browser's native snap.) */
   const goTo = useCallback((index: number) => {
     const root = deckRef.current;
     if (!root) return;
     const clamped = Math.max(0, Math.min(SCREENS.length - 1, index));
-    root.scrollTo({ top: clamped * root.clientHeight });
+    root.scrollTo({
+      top: clamped * root.clientHeight,
+      behavior: "instant" as ScrollBehavior,
+    });
   }, []);
 
   // Track the active screen with a VIEWPORT-rooted IntersectionObserver (root:
@@ -101,33 +106,43 @@ export function LearnDeck() {
     return () => observer.disconnect();
   }, []);
 
-  // Keyboard navigation — only when focus is inside the deck (so it doesn't
-  // hijack the nav or other page chrome). PageDown/Down/Space → next, etc.
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      // Don't steal typing from any focused control inside a screen.
-      const target = e.target as HTMLElement;
+  // Keyboard navigation — bound to the WINDOW so Arrow/Page/Home/End/Space work
+  // anywhere on /learn without first clicking into the deck. The current index
+  // is read from the deck's scroll position (no stale closure). Typing in a form
+  // field is never hijacked, and Space on a focused button/link still activates
+  // it (we only page on Space when focus isn't on an interactive control).
+  useEffect(() => {
+    const deck = deckRef.current;
+    if (!deck) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
       if (
-        target.isContentEditable ||
-        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+        target?.isContentEditable ||
+        (tag && ["INPUT", "TEXTAREA", "SELECT"].includes(tag))
       ) {
         return;
       }
+      const cur = Math.round(deck.scrollTop / (deck.clientHeight || 1));
       switch (e.key) {
         case "ArrowDown":
         case "PageDown":
           e.preventDefault();
-          goTo(activeIndex + 1);
+          goTo(cur + 1);
           break;
-        case " ":
-          // Space pages forward (Shift+Space back) — classic deck control.
+        case " ": {
+          // Don't steal Space from a focused button/link (it activates them).
+          const role = target?.getAttribute("role");
+          if (tag === "BUTTON" || tag === "A" || role === "button") return;
           e.preventDefault();
-          goTo(activeIndex + (e.shiftKey ? -1 : 1));
+          goTo(cur + (e.shiftKey ? -1 : 1));
           break;
+        }
         case "ArrowUp":
         case "PageUp":
           e.preventDefault();
-          goTo(activeIndex - 1);
+          goTo(cur - 1);
           break;
         case "Home":
           e.preventDefault();
@@ -140,9 +155,11 @@ export function LearnDeck() {
         default:
           break;
       }
-    },
-    [activeIndex, goTo],
-  );
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goTo]);
 
   const ctx = useMemo<DeckContextValue>(
     () => ({ activeIndex }),
@@ -157,7 +174,6 @@ export function LearnDeck() {
           // Each screen fills the area below the sticky h-14 (3.5rem) Nav.
           className="snap-deck h-[calc(100svh-3.5rem)] outline-none"
           tabIndex={-1}
-          onKeyDown={onKeyDown}
           aria-roledescription="carousel"
           aria-label="Learn module presentation"
         >

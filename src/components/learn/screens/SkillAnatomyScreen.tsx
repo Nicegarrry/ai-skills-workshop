@@ -1,11 +1,13 @@
 "use client";
 
 /**
- * SkillAnatomyScreen — slide 5. Shows a skill as it actually lives on disk: a
- * folder tree (a file-explorer view) next to the annotated SKILL.md + voice.md,
- * with tight call-outs for the OneDrive path, discovery-by-description, the
- * multi-file pattern, and limits. Segues to the lab. Facts from BUILD_BRIEF §4.
+ * SkillAnatomyScreen — slide 5. Shows a skill as it actually lives on disk: an
+ * INTERACTIVE folder tree (a file-explorer view) on the left — click a file and
+ * its preview swaps in on the right — with tight call-outs for the OneDrive
+ * path, discovery-by-description, the multi-file pattern, and limits. Segues to
+ * the lab. Facts from BUILD_BRIEF §4.
  */
+import { useState } from "react";
 import { CodePane } from "@/components/ui";
 import {
   FolderIcon,
@@ -16,6 +18,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/cn";
 import { Reveal } from "../Reveal";
+
+type FileId = "skill" | "voice";
 
 const SKILL_MD_EXAMPLE = `---
 name: email-in-my-voice
@@ -39,10 +43,31 @@ const VOICE_MD_EXAMPLE = `# My voice
 
 ## Sample email
 Hi Sam — quick one. Pushed the deck to the
-shared drive. Cheers, Alex
+shared drive. Two slides still need Q3 numbers;
+I'll have those Thursday. Shout if you want to
+walk through it first. Cheers, Alex
 
 ## Tone notes
-Warm but efficient. No corporate jargon.`;
+Warm but efficient. No corporate jargon. Short
+paragraphs. Signs off "Cheers" or first name.`;
+
+const FILES: Record<
+  FileId,
+  { filename: string; code: string; note: string; accent: boolean }
+> = {
+  skill: {
+    filename: "SKILL.md",
+    code: SKILL_MD_EXAMPLE,
+    note: "the instructions",
+    accent: true,
+  },
+  voice: {
+    filename: "voice.md",
+    code: VOICE_MD_EXAMPLE,
+    note: "supporting file",
+    accent: false,
+  },
+};
 
 const CALLOUTS = [
   {
@@ -67,13 +92,49 @@ const CALLOUTS = [
   },
 ] as const;
 
-/** A small file-explorer view: the skill is just a folder of files in OneDrive. */
-function FolderTree() {
-  const row = "flex items-center gap-1.5 rounded-sm px-1.5 py-1 font-mono text-[12px]";
+/** Interactive file-explorer: click a file to preview it on the right. */
+function FolderTree({
+  selected,
+  onSelect,
+}: {
+  selected: FileId;
+  onSelect: (id: FileId) => void;
+}) {
+  const fileRow = (id: FileId) => {
+    const f = FILES[id];
+    const isSel = selected === id;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelect(id)}
+        aria-pressed={isSel}
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-sm px-1.5 py-1 text-left font-mono text-[12px] transition-colors",
+          isSel
+            ? "bg-accent-100 font-medium text-accent-800 ring-1 ring-accent-300"
+            : "text-fg hover:bg-surface-2",
+        )}
+      >
+        <span className="flex items-center gap-1.5">
+          <DocumentTextIcon
+            className={cn(
+              "h-4 w-4 shrink-0",
+              f.accent ? "text-accent-600" : "text-neutral-500",
+            )}
+            aria-hidden="true"
+          />
+          {f.filename}
+        </span>
+        <span className="font-sans text-[10px] text-muted">{f.note}</span>
+      </button>
+    );
+  };
+
+  const row = "flex items-center gap-1.5 px-1.5 py-1 font-mono text-[12px]";
   return (
     <div className="rounded-control border border-line bg-surface p-3 shadow-card">
-      <p className="eyebrow mb-2 text-muted">The skill on disk</p>
-      <ul className="space-y-0.5 text-fg">
+      <p className="eyebrow mb-2 text-muted">Click a file to preview</p>
+      <ul className="space-y-0.5">
         <li className={cn(row, "text-muted")}>
           <FolderIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
           OneDrive
@@ -85,25 +146,13 @@ function FolderTree() {
           </span>
           <ul className="ml-2 border-l border-line pl-2">
             <li>
-              <span className={cn(row, "bg-accent-50 font-medium text-accent-800")}>
+              <span className={cn(row, "font-medium text-accent-800")}>
                 <FolderOpenIcon className="h-4 w-4 shrink-0 text-accent-600" aria-hidden="true" />
                 email-in-my-voice/
               </span>
-              <ul className="ml-2 border-l border-line pl-2">
-                <li className={cn(row, "justify-between")}>
-                  <span className="flex items-center gap-1.5">
-                    <DocumentTextIcon className="h-4 w-4 shrink-0 text-accent-600" aria-hidden="true" />
-                    SKILL.md
-                  </span>
-                  <span className="font-sans text-[10px] text-muted">the instructions</span>
-                </li>
-                <li className={cn(row, "justify-between")}>
-                  <span className="flex items-center gap-1.5">
-                    <DocumentTextIcon className="h-4 w-4 shrink-0 text-neutral-500" aria-hidden="true" />
-                    voice.md
-                  </span>
-                  <span className="font-sans text-[10px] text-muted">supporting file</span>
-                </li>
+              <ul className="ml-2 space-y-0.5 border-l border-line pl-2">
+                <li>{fileRow("skill")}</li>
+                <li>{fileRow("voice")}</li>
               </ul>
             </li>
           </ul>
@@ -118,6 +167,9 @@ function FolderTree() {
 }
 
 export function SkillAnatomyScreen() {
+  const [selected, setSelected] = useState<FileId>("skill");
+  const file = FILES[selected];
+
   return (
     <div className="space-y-6">
       <div className="space-y-3">
@@ -143,23 +195,20 @@ export function SkillAnatomyScreen() {
         </Reveal>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,300px)_1fr]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,300px)_1fr]">
         <Reveal delay={200}>
-          <FolderTree />
+          <FolderTree selected={selected} onSelect={setSelected} />
         </Reveal>
-        <Reveal delay={280} className="grid gap-3 sm:grid-cols-2">
-          <CodePane
-            filename="SKILL.md"
-            code={SKILL_MD_EXAMPLE}
-            language="markdown"
-            maxHeight="15rem"
-          />
-          <CodePane
-            filename="voice.md"
-            code={VOICE_MD_EXAMPLE}
-            language="markdown"
-            maxHeight="15rem"
-          />
+        <Reveal delay={280}>
+          {/* Keyed so it re-mounts (and fades) when you pick a different file. */}
+          <div key={selected} className="animate-fade-in">
+            <CodePane
+              filename={file.filename}
+              code={file.code}
+              language="markdown"
+              maxHeight="17rem"
+            />
+          </div>
         </Reveal>
       </div>
 
