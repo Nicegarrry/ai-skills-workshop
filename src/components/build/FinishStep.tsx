@@ -75,13 +75,14 @@ export function FinishStep({
   );
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex animate-fade-up flex-col gap-7">
       <div className="flex flex-col gap-3">
-        <Badge tone="ok">
+        <Badge tone="ok" className="self-start">
           <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
           Skill ready
         </Badge>
-        <h2 className="text-2xl font-semibold tracking-tight text-fg">
+        <p className="eyebrow">Step 5 · Finish</p>
+        <h2 className="font-serif text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
           You built a real skill
         </h2>
         <p className="max-w-2xl text-base leading-relaxed text-muted">
@@ -96,7 +97,7 @@ export function FinishStep({
       </div>
 
       {/* Downloads */}
-      <Card as="section" aria-label="Download your skill files">
+      <Card as="section" className="card-lift" aria-label="Download your skill files">
         <CardHeader>
           <CardTitle>Download your files</CardTitle>
         </CardHeader>
@@ -147,7 +148,7 @@ export function FinishStep({
       </div>
 
       {/* Building-blocks reminder */}
-      <Card as="section" aria-label="The four building blocks">
+      <Card as="section" className="card-lift" aria-label="The four building blocks">
         <CardHeader>
           <CardTitle>Remember the four building blocks</CardTitle>
         </CardHeader>

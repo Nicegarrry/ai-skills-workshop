@@ -1,115 +1,111 @@
 /**
- * Nav — top navigation bar shared across the whole workshop.
+ * Nav — slim sticky top bar, Register A (SapphireOS light).
  *
- * Renders:
- *  - Workshop name (links to /)
- *  - Two primary nav links: Learn (/learn) and Build (/build)
- *  - An optional progress indicator: a pair of small dots that fill
- *    when the visitor has advanced past the landing. Driven by the
- *    `data-nav-step` attribute — not required for correctness; the nav
- *    works without JS.
+ * Shell is a Server Component for prefetch. Active-link highlighting
+ * needs usePathname(), so it lives in the thin <NavLinks> Client Component
+ * — the only 'use client' surface here.
  *
- * Server component (no 'use client') — uses Next <Link> for prefetch.
- * Active-link highlighting is handled via CSS (current-page contrast).
+ * Design language:
+ *  - warm-paper/translucent backdrop (bg-bg/85 + backdrop-blur)
+ *  - sapphire bottom border on scroll (always present, subtle)
+ *  - wordmark: serif "AI Skills Workshop" — editorial, no logo/branding
+ *  - nav links: muted text → fg on hover; active = sapphire pill bg + text
  */
+
+"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-/** Internal link item used by the nav. */
-function NavLink({
-  href,
-  children,
-  className,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-control px-3 py-1.5",
-        "text-sm font-medium text-muted",
-        "transition-colors duration-150",
-        "hover:bg-surface-2 hover:text-fg",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
-        className,
-      )}
-    >
-      {children}
-    </Link>
-  );
-}
+const NAV_LINKS = [
+  { href: "/learn", label: "Learn" },
+  { href: "/build", label: "Build" },
+] as const;
 
-/**
- * Two small progress dots — one per module (Learn, Build).
- * Pure visual; no client logic needed for the shell. The /build page
- * can set body[data-build-started] to drive more granular state if desired.
- */
-function ProgressDots() {
+function NavLinks() {
+  const pathname = usePathname();
+
   return (
-    <div
-      className="hidden sm:flex items-center gap-1.5"
-      aria-hidden="true"
-      title="Workshop progress"
-    >
-      {/* Learn dot */}
-      <span className="h-1.5 w-1.5 rounded-pill bg-neutral-300 dark:bg-neutral-600" />
-      {/* Build dot */}
-      <span className="h-1.5 w-1.5 rounded-pill bg-neutral-300 dark:bg-neutral-600" />
-    </div>
+    <nav aria-label="Workshop navigation">
+      <ul className="flex items-center gap-0.5 list-none m-0 p-0">
+        {NAV_LINKS.map(({ href, label }) => {
+          const active = pathname === href || pathname.startsWith(href + "/");
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "inline-flex items-center rounded-control px-3 py-1.5",
+                  "text-sm font-medium transition-colors duration-150",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
+                  active
+                    ? "bg-accent-100 text-accent-600 font-semibold"
+                    : "text-muted hover:bg-surface-2 hover:text-fg",
+                )}
+              >
+                {label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4 sm:px-6">
-        {/* Wordmark */}
+    <header
+      className={cn(
+        "sticky top-0 z-40",
+        "border-b border-line",
+        // warm-paper translucent: bg-bg at 88% + blur
+        "bg-[color-mix(in_oklab,var(--color-bg)_88%,transparent)]",
+        "backdrop-blur-md",
+        "supports-[backdrop-filter:blur(0)]:bg-bg/95",
+      )}
+    >
+      <div className="mx-auto flex h-12 max-w-5xl items-center gap-4 px-4 sm:px-6">
+
+        {/* Wordmark — serif editorial, no logo */}
         <Link
           href="/"
           className={cn(
             "flex items-center gap-2 rounded-control px-1 py-1",
-            "text-sm font-semibold text-fg tracking-tight",
             "transition-opacity duration-150 hover:opacity-75",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
           )}
         >
-          {/* Small accent square icon */}
+          {/* Sapphire accent pip */}
           <span
-            className="flex h-6 w-6 items-center justify-center rounded-md bg-accent-600 text-white text-xs font-bold select-none"
+            className="h-1.5 w-4 rounded-pill bg-accent-600 shrink-0"
             aria-hidden="true"
+          />
+          <span
+            className={cn(
+              "font-serif text-base tracking-tight text-fg",
+              "hidden sm:inline",
+            )}
           >
-            S
+            AI Skills Workshop
           </span>
-          <span className="hidden sm:inline">Skills Workshop</span>
-          <span className="sm:hidden">Workshop</span>
+          <span
+            className={cn(
+              "font-serif text-base tracking-tight text-fg",
+              "sm:hidden",
+            )}
+          >
+            AI Skills
+          </span>
         </Link>
 
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Progress dots */}
-        <ProgressDots />
-
-        {/* Nav links */}
-        <nav aria-label="Workshop navigation">
-          <ul className="flex items-center gap-1 list-none m-0 p-0">
-            <li>
-              <NavLink href="/learn">Learn</NavLink>
-            </li>
-            <li>
-              <NavLink
-                href="/build"
-                className="text-accent-600 hover:text-accent-700 hover:bg-accent-50"
-              >
-                Build
-              </NavLink>
-            </li>
-          </ul>
-        </nav>
+        {/* Nav links — client for active state */}
+        <NavLinks />
       </div>
     </header>
   );

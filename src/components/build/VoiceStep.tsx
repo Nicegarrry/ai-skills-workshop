@@ -22,9 +22,10 @@ export function VoiceStep({ scenarioId, voice, onChange }: VoiceStepProps) {
   const voiceMd = assembleVoiceMd(voice);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex animate-fade-up flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-fg">
+        <p className="eyebrow">Step 2 · voice.md</p>
+        <h2 className="font-serif text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
           Capture your voice
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">

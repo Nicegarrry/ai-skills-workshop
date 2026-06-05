@@ -3,34 +3,43 @@
 /**
  * TestBench — step 4 of the lab and the payoff.
  *
- * Left: an editable messy draft + a slash-command-style instruction input.
- * Run → POST /api/run-skill with { skillMd, voiceMd, draft, instruction,
- * scenarioId }. Right: the finished email the model produced by applying the
- * learner's skill, under a "Cowork loaded <name> (matched your description) →
- * applied voice.md" trace line that reinforces the discovery model.
+ * The run experience is staged INSIDE a CoworkFrame so it reads as the real
+ * Microsoft 365 Copilot Cowork product (register B — Fluent 2), while the
+ * authoring controls stay in the warm SapphireOS register A on the left.
  *
- * The learner can also tweak voice.md / SKILL.md inline (collapsible editors)
- * and re-run to watch the output improve. Handles loading + error states and
- * labels MOCK-mode output ("demo mode — configure a model key for live
- * results"). SKILL.md / voice.md are assembled from the current fields by the
- * parent and passed in, so the request always reflects the latest edits.
+ * Left (register A): the rough draft is an editable input ("the rough draft
+ * Cowork is working from"), plus a collapsible "Tweak the skill" editor for
+ * description / instructions / tone so the learner can edit and re-run.
+ *
+ * Right (register B — the CoworkFrame): the slash instruction is typed into the
+ * Cowork composer ("invoke your skill"). On Run, the learner's instruction
+ * appears as a user turn, then a CoworkWorking step list advances on a short
+ * timer (always visible, even in MOCK mode), and finally the result lands as an
+ * assistant turn — a "Cowork loaded <skill> (matched your description) → applied
+ * voice.md" trace line, a CoworkStatusChip, and the finished email rendered as
+ * readable, wrapping prose (NOT a horizontally-scrolling code pane).
+ *
+ * Networking: POST /api/run-skill with { skillMd, voiceMd, draft, instruction,
+ * scenarioId } — request shape unchanged. SKILL.md / voice.md are assembled from
+ * the current fields by the parent and passed in, so the request always reflects
+ * the latest edits. The result is mode-labelled ("Demo mode" vs "Live"); MOCK
+ * carries a subtle note + the demo callout. Loading + error states preserved.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Callout, Field, TextField } from "@/components/ui";
 import {
-  Badge,
-  Button,
-  Callout,
-  CodePane,
-  Field,
-  TextField,
-} from "@/components/ui";
+  CoworkFrame,
+  CoworkMessage,
+  CoworkStatusChip,
+  CoworkWorking,
+  CoworkComposer,
+  Sparkle,
+} from "@/components/cowork";
 import { cn } from "@/lib/cn";
 import {
   ArrowPathIcon,
   ChevronDownIcon,
-  PlayIcon,
-  SparklesIcon,
-  CommandLineIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { parseFrontmatter } from "@/lib/skill";
 import type {
@@ -57,6 +66,24 @@ export type TestBenchProps = {
   onResult: (result: LastResult) => void;
 };
 
+/** The discovery trace shown while Cowork "works" — mirrors the discovery model
+ *  (find skill → load it → read its files → apply → write). Always animated so
+ *  the run reads as the agentic, multi-step product, even in MOCK mode. */
+function buildWorkingSteps(skillName: string): string[] {
+  return [
+    "Discovering skills…",
+    `Matched ${skillName}`,
+    "Reading voice.md",
+    "Applying your skill",
+    "Drafting the email",
+  ];
+}
+
+/** Total time the working animation is on screen, spread across the 5 steps.
+ *  Kept short (~2s) so it's lively but never tedious; clamped so the reveal is
+ *  always gated behind a complete pass of the step list. */
+const STEP_INTERVAL_MS = 420;
+
 export function TestBench({
   scenarioId,
   skill,
@@ -75,19 +102,73 @@ export function TestBench({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editorsOpen, setEditorsOpen] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
 
-  // The discovery name shown in the trace line — parsed from the actual
-  // SKILL.md frontmatter so it always matches what the model received.
-  const loadedName = parseFrontmatter(skillMd).name?.trim() || skill.name;
+  // Animation state. `activeStep` walks the working-step list while a run is in
+  // flight; the result is only revealed once the animation has finished a full
+  // pass AND the network has returned (whichever is later) — so the multi-step
+  // "agent at work" moment is always seen, even when MOCK returns instantly.
+  const [activeStep, setActiveStep] = useState(0);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const animDoneRef = useRef(false);
+  // The network result, held in a ref so the timer callback can read the latest
+  // value and reveal it on the final animation tick (no second effect / no
+  // synchronous setState-in-effect cascade).
+  const pendingResultRef = useRef<LastResult | null>(null);
+
+  // The discovery name shown in the working steps + trace line — parsed from the
+  // actual SKILL.md frontmatter so it always matches what the model received.
+  const loadedName = parseFrontmatter(skillMd).name?.trim() || skill.name || "your-skill";
+  const steps = buildWorkingSteps(loadedName);
+  const stepCount = steps.length;
+
+  // Reveal a finished run: hand it to the parent and clear the loading state.
+  // Stable across renders so the timer effect's dep list stays tight.
+  const reveal = useCallback(
+    (result: LastResult) => {
+      onResult(result);
+      pendingResultRef.current = null;
+      setLoading(false);
+    },
+    [onResult],
+  );
+
+  /* ---------- Working-step animation ---------- */
+  // While loading, advance `activeStep` on a timer. The advance happens in the
+  // timeout callback (NOT the effect body), so it doesn't cascade renders. On
+  // the final tick we mark the animation done and, if the network has already
+  // returned, reveal the stashed result.
+  useEffect(() => {
+    if (!loading) return;
+    if (activeStep >= stepCount) return;
+
+    const id = window.setTimeout(() => {
+      const next = activeStep + 1;
+      setActiveStep(next);
+      if (next >= stepCount) {
+        animDoneRef.current = true;
+        const result = pendingResultRef.current;
+        if (result) reveal(result);
+      }
+    }, STEP_INTERVAL_MS);
+    return () => window.clearTimeout(id);
+  }, [loading, activeStep, stepCount, reveal]);
+
+  // Abort any in-flight request on unmount.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const run = useCallback(async () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // Reset the animation for this run and start it from the top.
+    animDoneRef.current = false;
+    pendingResultRef.current = null;
+    setActiveStep(0);
     setLoading(true);
     setError(null);
+
     try {
       const body: RunSkillRequest = {
         skillMd,
@@ -118,12 +199,21 @@ export function TestBench({
         throw new Error(data.error || "The run failed. Try again in a moment.");
       }
 
-      onResult({
+      const result: LastResult = {
         output: data.output,
         mode: data.mode,
         model: data.model,
         at: Date.now(),
-      });
+      };
+
+      // Gate the reveal behind the working animation so the agentic moment is
+      // always seen — if the animation has already finished, reveal now;
+      // otherwise stash it in the ref for the final animation tick to flush.
+      if (animDoneRef.current) {
+        reveal(result);
+      } else {
+        pendingResultRef.current = result;
+      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setError(
@@ -131,36 +221,41 @@ export function TestBench({
           ? err.message
           : "Something went wrong running your skill.",
       );
+      setLoading(false);
+      pendingResultRef.current = null;
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null;
-        setLoading(false);
       }
     }
-  }, [skillMd, voiceMd, draft, instruction, scenarioId, onResult]);
+  }, [skillMd, voiceMd, draft, instruction, scenarioId, reveal]);
 
   const hasRun = !!lastResult;
+  const showComposerSubmit = useCallback(() => void run(), [run]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex animate-fade-up flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-fg">
-          Test bench
+        <p className="eyebrow">Step 4 · Test bench</p>
+        <h2 className="font-serif text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+          Watch your skill run
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Here&rsquo;s a messy draft. Describe what you want — like you would to
-          Cowork — and run it. The model loads your skill, reads{" "}
-          <code className="font-mono">voice.md</code>, and returns a finished
-          result. Don&rsquo;t love it? Edit the skill below and run again.
+          Here&rsquo;s a messy draft. On the right is a stand-in for{" "}
+          <span className="font-medium text-fg">Cowork</span> — describe what you
+          want like you would to your AI coworker, and run it. Cowork discovers
+          your skill, reads <code className="font-mono">voice.md</code>, and
+          returns a finished result. Don&rsquo;t love it? Tweak the skill and run
+          again.
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input column */}
+        {/* ---------- Left: authoring (register A) ---------- */}
         <div className="flex flex-col gap-5">
           <TextField
-            label="Messy draft"
-            hint="This is the rough input handed to your skill. Edit it freely."
+            label="The rough draft Cowork is working from"
+            hint="This is the messy input handed to your skill. Edit it freely."
             rows={9}
             value={draft}
             onChange={(e) => onDraftChange(e.target.value)}
@@ -168,68 +263,7 @@ export function TestBench({
             className="font-mono text-[13px]"
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="testbench-command"
-              className="text-sm font-medium text-fg"
-            >
-              Invoke your skill
-            </label>
-            <div
-              className={cn(
-                "flex items-center gap-2 rounded-control border border-line-strong bg-surface px-3",
-                "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-500",
-              )}
-            >
-              <CommandLineIcon
-                className="h-4 w-4 shrink-0 text-accent-600"
-                aria-hidden="true"
-              />
-              <input
-                id="testbench-command"
-                type="text"
-                value={instruction}
-                onChange={(e) => onInstructionChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !loading) {
-                    e.preventDefault();
-                    void run();
-                  }
-                }}
-                placeholder="/skill polish this for my Monday update"
-                spellCheck={false}
-                className="h-11 w-full bg-transparent font-mono text-sm text-fg placeholder:text-neutral-400 focus-visible:outline-none"
-              />
-            </div>
-            <p className="text-xs text-muted">
-              In real Cowork you&rsquo;d just describe the task — discovery picks
-              the skill for you. This slash style makes the &ldquo;invoke&rdquo;
-              explicit for the demo.
-            </p>
-          </div>
-
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => void run()}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <ArrowPathIcon
-                    className="h-5 w-5 animate-spin"
-                    aria-hidden="true"
-                  />
-                  Running…
-                </>
-              ) : (
-                <>
-                  <PlayIcon className="h-5 w-5" aria-hidden="true" />
-                  {hasRun ? "Run again" : "Run skill"}
-                </>
-              )}
-            </Button>
             <button
               type="button"
               onClick={() => setEditorsOpen((v) => !v)}
@@ -246,6 +280,11 @@ export function TestBench({
               />
               Tweak the skill
             </button>
+            {hasRun && (
+              <p className="text-xs text-muted">
+                Edit, then send the command again to compare.
+              </p>
+            )}
           </div>
 
           {editorsOpen && (
@@ -285,135 +324,225 @@ export function TestBench({
               />
             </div>
           )}
+
+          <p className="text-xs leading-relaxed text-muted">
+            In real Cowork you&rsquo;d just describe the task — discovery picks
+            the skill for you. The composer on the right makes the
+            &ldquo;invoke&rdquo; explicit for the demo.
+          </p>
         </div>
 
-        {/* Output column */}
+        {/* ---------- Right: the Cowork mock surface (register B) ---------- */}
+        {/* aria-live announces the result; the transcript is the run's story. */}
         <div
           className="flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start"
           aria-live="polite"
-          aria-atomic="true"
+          aria-atomic="false"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">
-            Result
-          </p>
+          <CoworkFrame
+            className="h-full min-h-[28rem]"
+            headerAside={
+              loading ? (
+                <CoworkStatusChip variant="in-progress" />
+              ) : lastResult ? (
+                <CoworkStatusChip variant="done" />
+              ) : error ? (
+                <CoworkStatusChip variant="failed" />
+              ) : undefined
+            }
+            composer={
+              <CoworkComposer
+                value={instruction}
+                onChange={onInstructionChange}
+                onSubmit={showComposerSubmit}
+                placeholder="/skill polish this for my Monday update"
+                loading={loading}
+              />
+            }
+          >
+            <CoworkTranscript
+              instruction={instruction}
+              steps={steps}
+              activeStep={activeStep}
+              loading={loading}
+              error={error}
+              result={lastResult}
+              loadedName={loadedName}
+              hasRun={hasRun}
+              onRetry={() => void run()}
+            />
+          </CoworkFrame>
 
-          <ResultPanel
-            loading={loading}
-            error={error}
-            result={lastResult}
-            loadedName={loadedName}
-            onRetry={() => void run()}
-          />
+          {/* A subtle register-A note that this surface is a stand-in, plus the
+              demo-mode callout when the latest result came from MOCK. */}
+          <p className="text-center text-xs text-muted">
+            A stand-in for Microsoft 365 Copilot Cowork, for the workshop.
+          </p>
+          {lastResult?.mode === "mock" && !loading && (
+            <Callout tone="info">
+              Demo mode — configure a model key for live results. The output above
+              came from a deterministic local transform so the bench works with no
+              key.
+            </Callout>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-/* ---------- Result panel (trace line + output / states) ---------- */
+/* ---------- The Cowork chat transcript (the run's story) ---------- */
 
-function ResultPanel({
+function CoworkTranscript({
+  instruction,
+  steps,
+  activeStep,
   loading,
   error,
   result,
   loadedName,
+  hasRun,
   onRetry,
 }: {
+  instruction: string;
+  steps: string[];
+  activeStep: number;
   loading: boolean;
   error: string | null;
   result: LastResult | null;
   loadedName: string;
+  hasRun: boolean;
   onRetry: () => void;
 }) {
-  if (loading) {
+  const trimmedInstruction = instruction.trim();
+
+  // Empty state — nothing run yet and nothing in flight.
+  if (!loading && !error && !result) {
     return (
-      <div className="flex min-h-[18rem] flex-col items-center justify-center gap-3 rounded-card border border-line bg-surface p-8 text-center shadow-card">
-        <SparklesIcon
-          className="h-7 w-7 animate-pulse text-accent-500"
-          aria-hidden="true"
+      <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 py-8 text-center">
+        <Sparkle size={28} animated />
+        <p className="font-fluent text-sm font-medium text-cw-text">
+          Ready when you are
+        </p>
+        <p className="max-w-xs font-fluent text-xs leading-relaxed text-cw-muted">
+          Type a request below — like{" "}
+          <span className="font-medium text-cw-text">
+            &ldquo;polish this for my Monday update&rdquo;
+          </span>{" "}
+          — and send it. Cowork will discover your skill and apply it.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* The user's request, echoed as a Cowork turn */}
+      {trimmedInstruction && (
+        <CoworkMessage role="user">{trimmedInstruction}</CoworkMessage>
+      )}
+
+      {/* In-flight: the agentic working state with the advancing step list */}
+      {loading && (
+        <CoworkWorking
+          steps={steps}
+          activeIndex={activeStep}
+          label="Working on it…"
+          skeletonLines={3}
         />
-        <p className="text-sm font-medium text-fg">Cowork is applying your skill…</p>
-        <p className="text-xs text-muted">
-          Loading <span className="font-mono">{loadedName}</span> → reading
-          voice.md → writing the result.
-        </p>
-      </div>
-    );
-  }
+      )}
 
-  if (error) {
-    return (
-      <Callout tone="warn" title="Couldn't complete the run">
-        <p>{error}</p>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="mt-3"
-          onClick={onRetry}
-        >
-          <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />
-          Try again
-        </Button>
-      </Callout>
-    );
-  }
+      {/* Error: surfaced as a Fluent-styled assistant turn with a retry */}
+      {!loading && error && (
+        <CoworkMessage role="assistant">
+          <div className="flex flex-col gap-2.5">
+            <span className="inline-flex items-center gap-1.5 font-medium text-cw-err">
+              <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />
+              Couldn&rsquo;t complete the run
+            </span>
+            <span className="text-cw-muted">{error}</span>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex w-fit items-center gap-1.5 rounded-control bg-cw-brand-tint px-3 py-1.5 text-xs font-semibold text-cw-brand transition-colors hover:bg-cw-brand hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cw-brand"
+            >
+              <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />
+              Try again
+            </button>
+          </div>
+        </CoworkMessage>
+      )}
 
-  if (!result) {
-    return (
-      <div className="flex min-h-[18rem] flex-col items-center justify-center gap-2 rounded-card border border-dashed border-line-strong bg-surface p-8 text-center">
-        <PlayIcon className="h-7 w-7 text-muted" aria-hidden="true" />
-        <p className="text-sm font-medium text-fg">No result yet</p>
-        <p className="max-w-xs text-xs text-muted">
-          Edit the draft and the command, then hit{" "}
-          <span className="font-medium text-fg">Run skill</span> to see your
-          skill in action.
-        </p>
-      </div>
-    );
-  }
+      {/* Result: the finished email as a readable, wrapping assistant turn */}
+      {!loading && !error && result && (
+        <CoworkResult result={result} loadedName={loadedName} hasRun={hasRun} />
+      )}
+    </>
+  );
+}
 
+/* ---------- The finished email, as a Cowork assistant turn ---------- */
+
+function CoworkResult({
+  result,
+  loadedName,
+  hasRun,
+}: {
+  result: LastResult;
+  loadedName: string;
+  hasRun: boolean;
+}) {
   const isMock = result.mode === "mock";
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Trace line — reinforces the discovery model */}
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-control border border-line bg-surface-2 px-3 py-2 text-xs text-muted">
-        <SparklesIcon
-          className="h-3.5 w-3.5 shrink-0 text-accent-600"
-          aria-hidden="true"
-        />
-        <span>Cowork loaded</span>
-        <span className="font-mono font-medium text-fg">{loadedName}</span>
-        <span>(matched your description)</span>
-        <span aria-hidden="true">→</span>
-        <span>
-          applied <span className="font-mono">voice.md</span>
-        </span>
-        {isMock ? (
-          <Badge tone="warn" className="ml-auto">
-            Demo mode
-          </Badge>
-        ) : (
-          <Badge tone="ok" className="ml-auto">
-            Live{result.model ? ` · ${result.model}` : ""}
-          </Badge>
+    <CoworkMessage role="assistant">
+      <div className="flex flex-col gap-3">
+        {/* Discovery trace + run status — reinforces the discovery model */}
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-cw-muted">
+          <span>Loaded</span>
+          <span className="font-mono font-medium text-cw-text">
+            {loadedName}
+          </span>
+          <span>(matched your description)</span>
+          <span aria-hidden="true">→</span>
+          <span>
+            applied <span className="font-mono">voice.md</span>
+          </span>
+          {isMock ? (
+            <CoworkStatusChip
+              variant="needs"
+              label="Demo mode"
+              className="ml-1"
+            />
+          ) : (
+            <CoworkStatusChip
+              variant="done"
+              label={result.model ? `Live · ${result.model}` : "Live"}
+              className="ml-1"
+            />
+          )}
+        </div>
+
+        {/* The finished email — readable prose that WRAPS (no horizontal
+            scroll). The CoworkMessage body already applies whitespace-pre-wrap
+            + break-words; this just sets the column to a comfortable measure. */}
+        <div className="max-w-prose font-fluent text-sm leading-relaxed text-cw-text">
+          {result.output}
+        </div>
+
+        {isMock && (
+          <p className="text-xs leading-relaxed text-cw-muted">
+            Demo mode — this came from a deterministic local transform so the
+            bench works with no model key. Configure a key for live results.
+          </p>
+        )}
+
+        {hasRun && (
+          <p className="text-xs text-cw-muted">
+            Not quite it? Edit the skill on the left and send the command again.
+          </p>
         )}
       </div>
-
-      <CodePane
-        filename={isMock ? "result.txt (demo)" : "result.txt"}
-        language="text"
-        code={result.output}
-        highlight={false}
-        maxHeight="32rem"
-      />
-
-      {isMock && (
-        <Callout tone="info">
-          Demo mode — configure a model key for live results. This output came
-          from a deterministic local transform so the bench works with no key.
-        </Callout>
-      )}
-    </div>
+    </CoworkMessage>
   );
 }

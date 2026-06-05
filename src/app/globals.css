@@ -2,103 +2,156 @@
 
 /*
   AI Skills Workshop — design tokens (Tailwind CSS v4 @theme).
-  Aesthetic: polished modern "AI workbench". Light base, ONE strong accent
-  (indigo-leaning blue — credible/enterprise, deliberately not generic-AI purple),
-  a neutral slate ramp, semantic ok/warn/error, and dark code/preview panes.
 
-  Tokens are consumed as Tailwind utilities everywhere (bg-accent, text-fg,
-  border-line, rounded-card, shadow-card, font-mono, etc). DO NOT hard-code
-  color literals in components — add a token here instead.
+  TWO registers, on purpose:
+  1. The WORKSHOP shell (landing, learn, build chrome) — "SapphireOS light":
+     warm-paper surfaces, deep sapphire accent, warm ink, amber secondary,
+     serif editorial headlines + mono eyebrow labels.
+  2. The simulated COPILOT COWORK surface (the test bench "watch it run" panel)
+     — Fluent 2: white/#F5F5F5, #0F6CBD brand, the Copilot sparkle gradient and
+     shimmer. Scoped under `--color-cw-*` + the .cowork helpers so it reads as a
+     different product embedded inside the course.
+
+  Consume everything as Tailwind utilities (bg-accent-600, text-fg, font-serif,
+  eyebrow, card-lift…). Don't hard-code color literals in components.
 */
 
 @theme {
-  /* ---- Fonts (wired from next/font CSS vars in layout.tsx) ---- */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  /* ---- Fonts (next/font CSS vars wired in layout.tsx) ---- */
+  --font-serif: var(--font-crimson), "Crimson Pro", Georgia, serif;
+  --font-sans: var(--font-inter-tight), "Inter Tight", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+  /* The Cowork mock uses Microsoft's system face for authenticity. */
+  --font-fluent: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
 
-  /* ---- Neutral ramp (warm-cool slate) ---- */
-  --color-neutral-50: oklch(98.4% 0.003 247);
-  --color-neutral-100: oklch(96.7% 0.005 247);
-  --color-neutral-200: oklch(92.6% 0.008 247);
-  --color-neutral-300: oklch(86.5% 0.012 247);
-  --color-neutral-400: oklch(70.5% 0.016 247);
-  --color-neutral-500: oklch(58.5% 0.018 247);
-  --color-neutral-600: oklch(47.5% 0.018 247);
-  --color-neutral-700: oklch(38.5% 0.017 247);
-  --color-neutral-800: oklch(27.5% 0.018 255);
-  --color-neutral-900: oklch(20.5% 0.02 260);
-  --color-neutral-950: oklch(14.5% 0.02 264);
+  /* ---- Neutral ramp: warm paper → warm ink ---- */
+  --color-neutral-50: #FBFAF6;
+  --color-neutral-100: #F7F4ED;
+  --color-neutral-200: #EFEAE0;
+  --color-neutral-300: #E5DFD2;
+  --color-neutral-400: #BBAFA3;
+  --color-neutral-500: #897C70;
+  --color-neutral-600: #5E564C;
+  --color-neutral-700: #4A4039;
+  --color-neutral-800: #2E2820;
+  --color-neutral-900: #1A1813;
+  --color-neutral-950: #100E0A;
 
-  /* ---- Accent (one strong accent) ---- */
-  --color-accent-50: oklch(97% 0.014 256);
-  --color-accent-100: oklch(93.5% 0.03 256);
-  --color-accent-200: oklch(88% 0.06 256);
-  --color-accent-300: oklch(80% 0.1 257);
-  --color-accent-400: oklch(70% 0.14 259);
-  --color-accent-500: oklch(62% 0.17 262);
-  --color-accent-600: oklch(55% 0.19 264);
-  --color-accent-700: oklch(48% 0.18 265);
-  --color-accent-800: oklch(41% 0.15 266);
-  --color-accent-900: oklch(35% 0.12 266);
+  /* ---- Accent: deep sapphire (NOT cyan) ---- */
+  --color-accent-50: #EEF2F8;
+  --color-accent-100: #E7ECF4;
+  --color-accent-200: #D4DEEC;
+  --color-accent-300: #A9BDD8;
+  --color-accent-400: #6E8DB6;
+  --color-accent-500: #1E4C80;
+  --color-accent-600: #16386B;
+  --color-accent-700: #102A52;
+  --color-accent-800: #0A1E3F;
+  --color-accent-900: #071630;
 
-  /* ---- Semantic ---- */
-  --color-ok-50: oklch(96% 0.03 152);
-  --color-ok-500: oklch(64% 0.15 152);
-  --color-ok-600: oklch(56% 0.14 152);
-  --color-ok-700: oklch(48% 0.12 152);
+  /* ---- Amber: warmth secondary (sparing) ---- */
+  --color-amber-50: #F9F2E2;
+  --color-amber-100: #F4EBD6;
+  --color-amber-200: #EAD9B4;
+  --color-amber-500: #B58324;
+  --color-amber-600: #8A6219;
+  --color-amber-700: #6D4E14;
 
-  --color-warn-50: oklch(97% 0.04 85);
-  --color-warn-500: oklch(76% 0.15 75);
-  --color-warn-600: oklch(68% 0.16 65);
-  --color-warn-700: oklch(56% 0.15 60);
+  /* ---- Semantic (warm-tuned, from the SapphireOS lifecycle palette) ---- */
+  --color-ok-50: #E1ECE3;
+  --color-ok-500: #2E5A3E;
+  --color-ok-600: #26492F;
+  --color-ok-700: #1D3A26;
 
-  --color-error-50: oklch(96.5% 0.025 17);
-  --color-error-500: oklch(62% 0.21 21);
-  --color-error-600: oklch(55% 0.22 22);
-  --color-error-700: oklch(48% 0.2 22);
+  --color-warn-50: #F4EBD6;
+  --color-warn-500: #B58324;
+  --color-warn-600: #8A6219;
+  --color-warn-700: #6D4E14;
 
-  /* ---- Semantic surface aliases (light theme defaults) ---- */
-  --color-bg: var(--color-neutral-50);
-  --color-surface: oklch(100% 0 0);
-  --color-surface-2: var(--color-neutral-100);
-  --color-fg: var(--color-neutral-900);
-  --color-muted: var(--color-neutral-600);
-  --color-line: var(--color-neutral-200);
-  --color-line-strong: var(--color-neutral-300);
+  --color-error-50: #F3E2E0;
+  --color-error-500: #9A2E26;
+  --color-error-600: #7E2620;
+  --color-error-700: #5F1C18;
 
-  /* Dark panel surface (code / preview panes — same in both color schemes) */
-  --color-panel: var(--color-neutral-950);
-  --color-panel-2: var(--color-neutral-900);
-  --color-panel-fg: var(--color-neutral-100);
-  --color-panel-muted: var(--color-neutral-400);
-  --color-panel-line: oklch(100% 0 0 / 0.08);
+  /* ---- Surface aliases (light defaults) ---- */
+  --color-bg: #F7F4ED;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EFEAE0;
+  --color-fg: #1A1813;
+  --color-muted: #5E564C;
+  --color-line: rgba(26, 24, 19, 0.1);
+  --color-line-strong: rgba(26, 24, 19, 0.2);
+
+  /* ---- Dark code/preview panes (warm-charcoal, same in both schemes) ---- */
+  --color-panel: #14110B;
+  --color-panel-2: #1E1A12;
+  --color-panel-fg: #F2EDE2;
+  --color-panel-muted: #A89C8C;
+  --color-panel-line: rgba(255, 255, 255, 0.08);
+
+  /* ---- Copilot Cowork mock surface (Fluent 2) ---- */
+  --color-cw-bg: #F5F5F5;
+  --color-cw-surface: #FFFFFF;
+  --color-cw-text: #242424;
+  --color-cw-muted: #616161;
+  --color-cw-line: #E0E0E0;
+  --color-cw-line-soft: #EBEBEB;
+  --color-cw-brand: #0F6CBD;
+  --color-cw-brand-hover: #115EA3;
+  --color-cw-brand-tint: #EBF3FC;
+  --color-cw-user: #F0F6FB;
+  --color-cw-ok: #107C10;
+  --color-cw-ok-tint: #DFF6DD;
+  --color-cw-warn: #BC4B09;
+  --color-cw-warn-tint: #FFF4CE;
+  --color-cw-err: #C50F1F;
+  --color-cw-err-tint: #FDE7E9;
 
   /* ---- Radius ---- */
-  --radius-card: 0.875rem;
-  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
   --radius-pill: 9999px;
 
-  /* ---- Shadow ---- */
-  --shadow-card: 0 1px 2px oklch(20% 0.02 260 / 0.04),
-    0 4px 16px oklch(20% 0.02 260 / 0.06);
-  --shadow-pop: 0 8px 30px oklch(20% 0.02 260 / 0.12);
-  --shadow-focus: 0 0 0 3px var(--color-accent-200);
+  /* ---- Shadow (warm ink-tinted) ---- */
+  --shadow-card: 0 1px 2px rgba(26, 24, 19, 0.05), 0 4px 14px rgba(26, 24, 19, 0.07);
+  --shadow-pop: 0 12px 32px rgba(26, 24, 19, 0.13);
+  --shadow-lift: 0 18px 44px rgba(26, 24, 19, 0.16);
+  --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--color-accent-600) 28%, transparent);
+  /* Cowork soft Fluent elevation */
+  --shadow-cw: 0 1px 2px rgba(0, 0, 0, 0.07), 0 0 2px rgba(0, 0, 0, 0.05);
+  --shadow-cw-pop: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+  /* ---- Motion ---- */
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ---- The Copilot sparkle gradient ---- */
+  --cw-gradient: linear-gradient(135deg, #199fd7 0%, #8a50d8 55%, #ee5091 100%);
+
+  /* ---- Animations (registered so `animate-*` utilities exist) ---- */
+  --animate-fade-up: fade-up 0.6s var(--ease-standard) both;
+  --animate-fade-in: fade-in 0.5s var(--ease-standard) both;
+  --animate-sparkle: sparkle-pulse 2.4s var(--ease-standard) infinite;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-sweep: gradient-sweep 2.2s linear infinite;
+  --animate-rise: rise 0.5s var(--ease-standard) both;
 }
 
 /*
-  Dark mode is class-based ([data-theme="dark"]) so the workbench chrome can be
-  toggled deterministically. Code/preview panes stay dark regardless.
+  Dark mode is class-based ([data-theme="dark"]); light is the default and the
+  app ships in light. Code/preview panes stay dark regardless.
 */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 [data-theme="dark"] {
-  --color-bg: var(--color-neutral-950);
-  --color-surface: var(--color-neutral-900);
-  --color-surface-2: var(--color-neutral-800);
-  --color-fg: var(--color-neutral-100);
-  --color-muted: var(--color-neutral-400);
-  --color-line: oklch(100% 0 0 / 0.08);
-  --color-line-strong: oklch(100% 0 0 / 0.14);
+  --color-bg: #14110B;
+  --color-surface: #1E1A12;
+  --color-surface-2: #2A241A;
+  --color-fg: #F2EDE2;
+  --color-muted: #BBAFA3;
+  --color-line: rgba(255, 255, 255, 0.09);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-accent-600: #4F8FCC;
+  --color-accent-700: #3D7AB6;
 }
 
 @layer base {
@@ -117,20 +170,147 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Consistent, accent-tinted focus ring across the kit. */
   :focus-visible {
-    outline: 2px solid var(--color-accent-500);
+    outline: 2px solid var(--color-accent-600);
     outline-offset: 2px;
-    border-radius: 2px;
+    border-radius: 3px;
   }
 
   ::selection {
     background-color: var(--color-accent-200);
-    color: var(--color-neutral-900);
+    color: var(--color-accent-900);
   }
 }
 
-/* Respect reduced-motion globally — kit components use `transition`/`animate`. */
+/* ----------------------------------------------------------------------------
+   Custom component classes — intentionally UNLAYERED (plain top-level rules) so
+   they always emit and apply. Sizing props (height/min-height) are deliberately
+   left to per-element utilities so .snap-deck / .snap-screen don't override the
+   layout utilities that set their dimensions.
+   --------------------------------------------------------------------------- */
+
+/* Mono uppercase eyebrow label — the SapphireOS signature. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-600);
+}
+
+/* Editorial highlight behind a headline word: <span class="mark">…</span>. */
+.mark {
+  background-image: linear-gradient(transparent 62%, var(--color-accent-200) 62%);
+  padding: 0 0.05em;
+}
+.mark-amber {
+  background-image: linear-gradient(transparent 62%, var(--color-amber-100) 62%);
+}
+
+/* White card with warm border + hover lift. */
+.card-lift {
+  transition:
+    transform var(--ease-standard) 250ms,
+    box-shadow var(--ease-standard) 250ms,
+    border-color 180ms;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Full-screen presentation deck: the deck is the scroll container, each
+   .snap-screen locks to it. Heights come from per-element utilities. */
+.snap-deck {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.snap-screen {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* The Copilot gradient as text or a fill. */
+.cw-grad-text {
+  background: var(--cw-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.cw-grad-bar {
+  background: var(--cw-gradient);
+  background-size: 200% 100%;
+  animation: var(--animate-sweep);
+}
+
+/* Fluent shimmer skeleton line (the Cowork "working" state). */
+.cw-shimmer {
+  background: linear-gradient(90deg, #ededed 25%, #f7f7f7 50%, #ededed 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+  border-radius: 4px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sparkle-pulse {
+  0%,
+  100% {
+    transform: scale(0.92) rotate(0deg);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.06) rotate(8deg);
+    opacity: 1;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes gradient-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Respect reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -139,5 +319,8 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .snap-deck {
+    scroll-snap-type: none;
   }
 }

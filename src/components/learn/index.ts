@@ -1,6 +1,9 @@
-export { MeetCowork } from "./MeetCowork";
-export { WhyASkill } from "./WhyASkill";
-export { BuildingBlocks } from "./BuildingBlocks";
-export { SkillAnatomy } from "./SkillAnatomy";
-export { WhoOwnsSkills } from "./WhoOwnsSkills";
-export { LearnCTA } from "./LearnCTA";
+/**
+ * Learn module barrel.
+ *
+ * Module 1 is a full-viewport scroll-snap PRESENTATION DECK. The page renders
+ * the single client orchestrator <LearnDeck>, which owns the scroll container,
+ * the IntersectionObserver, the fixed progress rail, and keyboard navigation,
+ * and composes the seven slide components under ./screens.
+ */
+export { LearnDeck } from "./LearnDeck";

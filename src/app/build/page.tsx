@@ -189,10 +189,8 @@ export default function BuildPage() {
       <div className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-accent-700">
-              Module 2 · Build
-            </p>
-            <h1 className="text-lg font-semibold tracking-tight text-fg">
+            <p className="eyebrow">Module 2 · Build</p>
+            <h1 className="font-serif text-2xl font-semibold tracking-tight text-fg">
               Build a Cowork skill, then watch it run
             </h1>
           </div>

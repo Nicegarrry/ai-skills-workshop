@@ -38,10 +38,10 @@ export function GoalStep({ scenarioId, onPick }: GoalStepProps) {
   const active = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex animate-fade-up flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Badge tone="accent">Step 1 · The goal</Badge>
-        <h2 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+        <p className="eyebrow">Step 1 · The goal</p>
+        <h2 className="font-serif text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
           {active.title}
         </h2>
         <p className="max-w-2xl text-base leading-relaxed text-muted">
@@ -51,7 +51,7 @@ export function GoalStep({ scenarioId, onPick }: GoalStepProps) {
         </p>
       </div>
 
-      <Card as="section" aria-label="What you'll walk away with">
+      <Card as="section" className="card-lift" aria-label="What you'll walk away with">
         <CardHeader>
           <CardTitle>What you&rsquo;ll walk away with</CardTitle>
         </CardHeader>
@@ -107,7 +107,7 @@ function ScenarioOption({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        "group flex flex-col gap-1.5 rounded-card border bg-surface p-4 text-left shadow-card transition-colors",
+        "card-lift group flex flex-col gap-1.5 rounded-card border bg-surface p-4 text-left shadow-card",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
         selected
           ? "border-accent-500 ring-2 ring-accent-200"
