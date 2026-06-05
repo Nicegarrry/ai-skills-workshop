@@ -60,7 +60,7 @@ work, downloaded to their machine.
   is hand-rolled / lightweight (a styled `<pre>` with minimal token coloring is fine).
 - **Tests:** `vitest` for the pure functions in §8 (the only logic worth unit-testing).
 - Model defaults (override with `WORKSHOP_MODEL`): Anthropic → `claude-sonnet-4-6`;
-  Google → `gemini-2.5-flash`. Verify exact model-id strings against current docs.
+  Google → `gemini-3.5-flash`. Verify exact model-id strings against current docs.
 
 ## 4. Verified Microsoft 365 Copilot Cowork facts (THE ONLY facts you may state)
 
@@ -229,7 +229,7 @@ like an email.
   - `ANTHROPIC_API_KEY` set → `@ai-sdk/anthropic`, model `process.env.WORKSHOP_MODEL ||
     'claude-sonnet-4-6'`.
   - else `GOOGLE_GENERATIVE_AI_API_KEY` set → `@ai-sdk/google`, model
-    `process.env.WORKSHOP_MODEL || 'gemini-2.5-flash'`.
+    `process.env.WORKSHOP_MODEL || 'gemini-3.5-flash'`.
   - else → **MOCK mode**: return `mockRun(...)` output with `mode: 'mock'`.
 - Build the prompt with `buildRunPrompt(...)`, call AI SDK `generateText` with a sensible
   `maxOutputTokens` (~700) and low temperature. Verify the current `generateText` /

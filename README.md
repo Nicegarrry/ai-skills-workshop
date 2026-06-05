@@ -43,7 +43,7 @@ The only server surface is `POST /api/run-skill`. Provider is chosen at request 
 | Env var set | Provider used | Default model |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Anthropic | `claude-sonnet-4-6` |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Generative AI | `gemini-2.5-flash` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Generative AI | `gemini-3.5-flash` |
 | Neither | **MOCK mode** | — |
 
 If both keys are set, Anthropic takes precedence.

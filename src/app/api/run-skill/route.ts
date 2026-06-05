@@ -176,7 +176,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const modelId =
       process.env.WORKSHOP_MODEL ??
-      (mode === "anthropic" ? "claude-sonnet-4-6" : "gemini-2.5-flash");
+      (mode === "anthropic" ? "claude-sonnet-4-6" : "gemini-3.5-flash");
 
     const model =
       mode === "anthropic" ? anthropic(modelId) : google(modelId);
