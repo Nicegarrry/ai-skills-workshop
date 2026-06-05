@@ -188,8 +188,8 @@ export default function LandingPage() {
           }}
         />
 
-        <div className="relative mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:py-28 lg:px-8">
-          <div className="flex flex-col items-start gap-16 lg:flex-row lg:items-center lg:gap-12 xl:gap-20">
+        <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-24 lg:py-28 lg:px-8">
+          <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-center lg:gap-12 xl:gap-20">
             {/* Left: editorial copy */}
             <div className="flex-1 min-w-0 animate-fade-up">
               {/* Eyebrow */}
@@ -255,18 +255,18 @@ export default function LandingPage() {
 
       {/* ── What you'll walk away with ─────────────────────────────────────── */}
       <section className="border-t border-line bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-6 py-12 sm:py-20 lg:px-8">
           {/* Section header */}
           <p className="eyebrow mb-3">Outcomes</p>
           <h2 className="font-serif text-3xl sm:text-4xl tracking-tight text-fg mb-2">
             What you&rsquo;ll{" "}
             <span className="mark-amber">walk away with</span>
           </h2>
-          <p className="text-muted max-w-prose mb-12">
+          <p className="text-muted max-w-prose mb-8 sm:mb-12">
             Three concrete outcomes — not theory slides, not a certificate.
           </p>
 
-          <ul className="grid gap-8 sm:grid-cols-3">
+          <ul className="grid gap-6 sm:gap-8 sm:grid-cols-3">
             <Outcome
               icon={AcademicCapIcon}
               title="A clear mental model"
@@ -288,12 +288,12 @@ export default function LandingPage() {
 
       {/* ── How it works — two-module strip ──────────────────────────────────── */}
       <section className="border-t border-line bg-bg">
-        <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-6 py-12 sm:py-20 lg:px-8">
           <p className="eyebrow mb-3">Two modules</p>
           <h2 className="font-serif text-3xl sm:text-4xl tracking-tight text-fg mb-2">
             How it works
           </h2>
-          <p className="text-muted max-w-prose mb-12">
+          <p className="text-muted max-w-prose mb-8 sm:mb-12">
             Learn just enough, then do. No fluff, no walls of text.
           </p>
 

@@ -221,16 +221,29 @@
 }
 
 /* Full-screen presentation deck: the deck is the scroll container, each
-   .snap-screen locks to it. Heights come from per-element utilities. */
+   .snap-screen locks to it. Heights come from per-element utilities.
+
+   On mobile/tablet (< lg / 1024px) the deck reads as a normal vertically
+   scrolling page — snap is disabled so content that exceeds the viewport is
+   fully reachable. At lg+ the full-viewport mandatory-snap presentation is
+   restored exactly as before. */
 .snap-deck {
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
   overflow-y: auto;
   overflow-x: hidden;
 }
 .snap-screen {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* No snap rules below lg; applied via the media query below. */
+}
+
+@media (min-width: 1024px) {
+  .snap-deck {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  .snap-screen {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
 }
 
 /* The Copilot gradient as text or a fill. */

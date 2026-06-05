@@ -168,13 +168,15 @@ export function LearnDeck() {
 
   return (
     <DeckContext.Provider value={ctx}>
-      <div className="relative h-[calc(100svh-3rem)] bg-bg">
+      {/* Mobile: auto height so all slide content is reachable by normal scroll.
+          lg+: fixed viewport height so mandatory snap works one-slide-per-view. */}
+      <div className="relative bg-bg lg:h-[calc(100svh-3rem)]">
         <div
           ref={deckRef}
           // The deck is a BORDERLESS scroll window — no outer boundary around the
           // whole navigator. Each slide instead carries its own hairline-framed
           // content panel (see DeckScreen), so the frame reads per-slide.
-          className="snap-deck h-full bg-bg outline-none"
+          className="snap-deck bg-bg outline-none lg:h-full"
           tabIndex={-1}
           aria-roledescription="carousel"
           aria-label="Learn module presentation"

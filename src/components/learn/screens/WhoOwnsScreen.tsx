@@ -45,14 +45,14 @@ export function WhoOwnsScreen() {
         <Reveal
           as="h2"
           delay={60}
-          className="font-serif text-4xl font-semibold leading-tight tracking-tight text-fg sm:text-5xl"
+          className="font-serif text-3xl font-semibold leading-tight tracking-tight text-fg sm:text-4xl md:text-5xl"
         >
           Who <span className="mark">owns</span> skills?
         </Reveal>
         <Reveal
           as="p"
           delay={120}
-          className="max-w-2xl text-lg leading-relaxed text-muted"
+          className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg"
         >
           The best skills come from the people closest to the work — not central
           IT. Here is the lightweight model that keeps things healthy.

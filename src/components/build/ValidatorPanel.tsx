@@ -32,7 +32,7 @@ export function ValidatorPanel({ findings, className }: ValidatorPanelProps) {
       aria-label="Skill validator"
       className={cn("overflow-hidden", className)}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-line bg-surface-2 px-4 py-3">
         <h3 className="eyebrow">Validator</h3>
         <p className="text-xs font-medium" aria-live="polite">
           {findings.length === 0 ? (

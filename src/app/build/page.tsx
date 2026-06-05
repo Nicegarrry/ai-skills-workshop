@@ -271,7 +271,7 @@ export default function BuildPage() {
             variant="ghost"
             onClick={goBack}
             disabled={currentIdx === 0}
-            className="sm:order-1"
+            className="w-full sm:order-1 sm:w-auto"
           >
             <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Back
@@ -283,7 +283,7 @@ export default function BuildPage() {
                 Fix the validator errors to continue.
               </p>
             )}
-            <Button variant="primary" onClick={goNext} disabled={nextBlocked}>
+            <Button variant="primary" onClick={goNext} disabled={nextBlocked} className="w-full sm:w-auto">
               {current === "test" ? (
                 <>
                   <CheckIcon className="h-4 w-4" aria-hidden="true" />

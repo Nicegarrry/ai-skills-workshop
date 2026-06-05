@@ -189,7 +189,7 @@ export function FinishStep({
         central review. A quick peer review before sharing goes a long way.
       </Callout>
 
-      <div className="flex items-center justify-between border-t border-line pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 border-t border-line pt-5">
         <p className="text-sm text-muted">Want to build another?</p>
         <Button variant="ghost" onClick={onStartOver}>
           <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />

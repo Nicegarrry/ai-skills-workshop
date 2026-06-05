@@ -30,7 +30,7 @@ export function BuildCTAScreen() {
       <Reveal
         as="h2"
         delay={60}
-        className="font-serif text-5xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl"
+        className="font-serif text-4xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-5xl md:text-6xl"
       >
         Now <span className="mark-amber">build one.</span>
       </Reveal>
@@ -38,7 +38,7 @@ export function BuildCTAScreen() {
       <Reveal
         as="p"
         delay={120}
-        className="mx-auto max-w-xl text-lg leading-relaxed text-muted"
+        className="mx-auto max-w-xl text-base leading-relaxed text-muted sm:text-lg"
       >
         You know what a skill is and why it matters. The lab takes about ten
         minutes — you&rsquo;ll author a real{" "}

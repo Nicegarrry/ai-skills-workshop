@@ -106,21 +106,21 @@ export function CodePane({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-card border border-neutral-800 bg-panel shadow-card",
+        "min-w-0 overflow-hidden rounded-card border border-neutral-800 bg-panel shadow-card",
         className,
       )}
     >
       {/* Tab bar */}
       <div className="flex items-center justify-between border-b border-panel-line bg-panel-2 px-3 py-2">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="flex gap-1.5" aria-hidden="true">
+        <div className="flex min-w-0 items-center gap-2 text-xs">
+          <span className="flex shrink-0 gap-1.5" aria-hidden="true">
             <span className="h-2.5 w-2.5 rounded-full bg-neutral-700" />
             <span className="h-2.5 w-2.5 rounded-full bg-neutral-700" />
             <span className="h-2.5 w-2.5 rounded-full bg-neutral-700" />
           </span>
-          <span className="font-mono font-medium text-panel-fg">{filename}</span>
+          <span className="min-w-0 truncate font-mono font-medium text-panel-fg">{filename}</span>
           {language && (
-            <span className="rounded-pill bg-neutral-800 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-panel-muted">
+            <span className="shrink-0 rounded-pill bg-neutral-800 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-panel-muted">
               {language}
             </span>
           )}
@@ -131,7 +131,7 @@ export function CodePane({
             onClick={onCopy}
             aria-label={copied ? "Copied" : `Copy ${filename}`}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-control px-2 py-1 text-xs font-medium",
+              "ml-2 inline-flex shrink-0 items-center gap-1.5 rounded-control px-2 py-1.5 text-xs font-medium",
               "text-panel-muted transition-colors hover:bg-neutral-800 hover:text-panel-fg",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
             )}
@@ -151,9 +151,9 @@ export function CodePane({
         )}
       </div>
 
-      {/* Code */}
+      {/* Code — overflow-x-auto so long lines scroll within the pane, not the page */}
       <div className="overflow-auto" style={maxHeight ? { maxHeight } : undefined}>
-        <pre className="px-4 py-3 font-mono text-[13px] leading-relaxed text-panel-fg">
+        <pre className="min-w-0 px-4 py-3 font-mono text-[12px] leading-relaxed text-panel-fg sm:text-[13px]">
           {highlight ? (
             // Safe: `tint` HTML-escapes the input FIRST, then only wraps the
             // already-escaped text in fixed span tags — user content cannot
