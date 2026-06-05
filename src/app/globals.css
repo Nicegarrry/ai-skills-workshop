@@ -62,7 +62,7 @@
   --color-surface: oklch(100% 0 0);
   --color-surface-2: var(--color-neutral-100);
   --color-fg: var(--color-neutral-900);
-  --color-muted: var(--color-neutral-500);
+  --color-muted: var(--color-neutral-600);
   --color-line: var(--color-neutral-200);
   --color-line-strong: var(--color-neutral-300);
 

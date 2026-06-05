@@ -120,7 +120,9 @@ export async function POST(request: Request): Promise<Response> {
   // --- rate limit ---
   maybePruneBuckets();
   const forwarded = request.headers.get("x-forwarded-for");
-  const ip = (forwarded ? forwarded.split(",")[0] : "unknown").trim();
+  // On Vercel the rightmost x-forwarded-for entry is appended by the edge and is
+  // trustworthy; leftmost entries are client-supplied and trivially spoofable.
+  const ip = (forwarded ? (forwarded.split(",").at(-1) ?? "unknown") : "unknown").trim();
 
   if (!checkRateLimit(ip)) {
     return Response.json(
@@ -195,8 +197,13 @@ export async function POST(request: Request): Promise<Response> {
     } satisfies RunSkillResponse);
   } catch (err) {
     // Never leak stack traces or key details — log a sanitised message server-side.
+    // Guard every configured provider key, not just Anthropic.
+    const keys = [
+      process.env.ANTHROPIC_API_KEY,
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    ].filter(Boolean) as string[];
     const safeMessage =
-      err instanceof Error && !err.message.includes(process.env.ANTHROPIC_API_KEY ?? "__NEVER__")
+      err instanceof Error && keys.every((k) => !err.message.includes(k))
         ? err.message
         : "LLM call failed.";
 

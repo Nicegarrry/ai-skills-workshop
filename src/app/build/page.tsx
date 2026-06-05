@@ -116,14 +116,28 @@ export default function BuildPage() {
   /* ---------- Navigation ---------- */
   const current = state.step;
 
+  // Scroll to the top of the new step and move focus there, so keyboard users
+  // don't lose their place. Honours prefers-reduced-motion (the JS scrollIntoView
+  // API isn't covered by the CSS reduced-motion rule).
+  const scrollToTop = useCallback(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    topRef.current?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    });
+    topRef.current?.focus({ preventScroll: true });
+  }, []);
+
   const goToIndex = useCallback(
     (idx: number) => {
       const clamped = Math.min(Math.max(idx, 0), BUILD_STEPS.length - 1);
       patch({ step: BUILD_STEPS[clamped] });
       setReachGrowth((m) => Math.max(m, clamped));
-      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollToTop();
     },
-    [patch],
+    [patch, scrollToTop],
   );
 
   const goNext = useCallback(
@@ -146,8 +160,8 @@ export default function BuildPage() {
   const handleStartOver = useCallback(() => {
     reset();
     setReachGrowth(0);
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [reset]);
+    scrollToTop();
+  }, [reset, scrollToTop]);
 
   // Block advancing into the test bench while the skill has hard errors — the
   // run would be unfair to the learner. Warnings never block.
@@ -169,7 +183,7 @@ export default function BuildPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-      <div ref={topRef} className="scroll-mt-6" />
+      <div ref={topRef} tabIndex={-1} className="scroll-mt-6 outline-none" />
 
       {/* Header + stepper */}
       <div className="flex flex-col gap-5">
@@ -200,8 +214,14 @@ export default function BuildPage() {
         </div>
       </div>
 
+      {/* Screen-reader-only announcement of the active step — kept off the step
+          body so the whole subtree isn't re-read on every change. */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {STEPPER_ITEMS.find((s) => s.id === current)?.label ?? ""}
+      </p>
+
       {/* Step body */}
-      <section className="mt-8" aria-live="polite">
+      <section className="mt-8">
         {current === "goal" && (
           <GoalStep scenarioId={state.scenarioId} onPick={handlePickScenario} />
         )}

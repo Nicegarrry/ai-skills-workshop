@@ -146,6 +146,6 @@ const CALLOUTS = [
   {
     icon: ExclamationTriangleIcon,
     title: "Limits",
-    body: "Up to 50 custom skills per user; each skill file up to 1 MB. The whole folder (SKILL.md + supporting files) lives under that one OneDrive path.",
+    body: "Up to 50 custom skills per user; each skill file up to 1 MB.",
   },
 ] as const;

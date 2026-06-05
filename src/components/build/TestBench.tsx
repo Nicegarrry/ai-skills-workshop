@@ -234,6 +234,7 @@ export function TestBench({
               type="button"
               onClick={() => setEditorsOpen((v) => !v)}
               aria-expanded={editorsOpen}
+              aria-controls="tweak-editors"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
             >
               <ChevronDownIcon
@@ -248,7 +249,10 @@ export function TestBench({
           </div>
 
           {editorsOpen && (
-            <div className="flex flex-col gap-5 rounded-card border border-line bg-surface-2 p-4">
+            <div
+              id="tweak-editors"
+              className="flex flex-col gap-5 rounded-card border border-line bg-surface-2 p-4"
+            >
               <p className="text-xs leading-relaxed text-muted">
                 Adjust the voice or the instructions, then run again to compare.
                 These edits update the same SKILL.md / voice.md you&rsquo;ll
@@ -284,7 +288,11 @@ export function TestBench({
         </div>
 
         {/* Output column */}
-        <div className="flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start">
+        <div
+          className="flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <p className="text-xs font-medium uppercase tracking-wide text-muted">
             Result
           </p>

@@ -26,7 +26,12 @@ import type { Finding, SkillFields, VoiceFields } from "@/lib/types";
  * ```
  */
 export function assembleSkillMd(input: SkillFields): string {
-  const { name, description, instructions } = input;
+  const { name, instructions } = input;
+  // Frontmatter scalars are single-line. The description field is a textarea, so
+  // collapse any newlines the learner typed — otherwise the continuation lines
+  // have no `key:` and parseFrontmatter would silently drop them, skewing the
+  // live validator feedback.
+  const description = input.description.replace(/\r?\n/g, " ").trim();
   const frontmatter = `---\nname: ${name}\ndescription: ${description}\n---`;
   const body = instructions.trim();
 
@@ -82,14 +87,15 @@ export function parseFrontmatter(md: string): {
     return { body: md };
   }
 
-  // Find the closing --- after the opening one (start searching from char 3)
-  const closeIdx = trimmed.indexOf("---", 3);
+  // Find the closing fence. Anchor on a newline so a `---` substring inside a
+  // field value isn't mistaken for the closing delimiter.
+  const closeIdx = trimmed.indexOf("\n---", 3);
   if (closeIdx === -1) {
     return { body: md };
   }
 
   const fmBlock = trimmed.slice(3, closeIdx);
-  const body = trimmed.slice(closeIdx + 3).trimStart();
+  const body = trimmed.slice(closeIdx + 4).trimStart();
 
   let name: string | undefined;
   let description: string | undefined;

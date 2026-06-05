@@ -67,6 +67,19 @@ describe("assembleSkillMd", () => {
     expect(parsed.description).toContain("Use when");
     expect(parsed.body).toContain("Read voice.md");
   });
+
+  it("collapses newlines in the description so frontmatter stays single-line and parseable", () => {
+    const skill: SkillFields = {
+      name: "multi-line-desc",
+      description: "Use when the user\nwrites a draft\nacross several lines.",
+      instructions: "Read voice.md and rewrite. Output only the email.",
+    };
+    const parsed = parseFrontmatter(assembleSkillMd(skill));
+    // Full description survives — no silent truncation at the first newline.
+    expect(parsed.description).toBe(
+      "Use when the user writes a draft across several lines.",
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -143,6 +156,14 @@ describe("parseFrontmatter", () => {
     const result = parseFrontmatter(md);
     expect(result.name).toBe("my-skill");
     expect(result.description).toBe("Use when here.");
+  });
+
+  it("does not treat a '---' inside a field value as the closing fence", () => {
+    const md =
+      "---\nname: x\ndescription: Use when --- separators appear inline\n---\nBody here.";
+    const result = parseFrontmatter(md);
+    expect(result.description).toBe("Use when --- separators appear inline");
+    expect(result.body).toBe("Body here.");
   });
 });
 

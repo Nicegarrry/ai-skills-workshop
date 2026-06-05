@@ -179,7 +179,7 @@ export default function LandingPage() {
             <Outcome
               icon={AcademicCapIcon}
               title="A clear mental model"
-              body="Understand the difference between a skill, a saved prompt, a plugin, and an agent — and when to reach for each."
+              body="Understand the difference between a skill, a saved prompt, a plugin, and a scheduled task — and when to reach for each."
             />
             <Outcome
               icon={BeakerIcon}
