@@ -56,40 +56,44 @@ export const DeckScreen = forwardRef<HTMLElement, DeckScreenProps>(
         aria-label={`${label} — slide ${index + 1} of ${total}`}
         className={cn(
           "snap-screen relative flex min-h-full flex-col justify-center",
-          "px-5 py-12 sm:px-10 lg:px-14",
+          "px-4 py-6 sm:px-8 sm:py-8 lg:px-12",
           className,
         )}
       >
-        {/* Slide counter + section eyebrow — top chrome of each slide. */}
-        <div
-          className={cn(
-            "mx-auto flex w-full max-w-4xl items-center gap-3 pb-8",
-            "transition-all duration-500 ease-out",
-            inView ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0",
-          )}
-        >
-          <span className="eyebrow text-accent-600/70">
-            {pad(index + 1)}&nbsp;/&nbsp;{pad(total)}
-          </span>
-          {/* Hairline that "draws" in sapphire as the slide arrives. */}
-          <span
-            className="relative h-px flex-1 overflow-hidden bg-line"
-            aria-hidden="true"
+        {/* Each slide's CONTENT AREA sits in its own hairline-framed panel — the
+            boundary reads per-slide, not around the whole deck/navigator. */}
+        <div className="mx-auto flex w-full max-w-4xl flex-col rounded-2xl border border-line bg-surface/70 px-6 py-7 shadow-card sm:px-10 sm:py-9">
+          {/* Slide counter + section eyebrow — top chrome of each slide. */}
+          <div
+            className={cn(
+              "flex w-full items-center gap-3 pb-6",
+              "transition-all duration-500 ease-out",
+              inView ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0",
+            )}
           >
+            <span className="eyebrow text-accent-600/70">
+              {pad(index + 1)}&nbsp;/&nbsp;{pad(total)}
+            </span>
+            {/* Hairline that "draws" in sapphire as the slide arrives. */}
             <span
-              className={cn(
-                "absolute inset-y-0 left-0 bg-accent-500 transition-[width] duration-700 ease-out",
-                inView ? "w-full" : "w-0",
-              )}
-            />
-          </span>
-          <span className="eyebrow text-muted">{label}</span>
-        </div>
+              className="relative h-px flex-1 overflow-hidden bg-line"
+              aria-hidden="true"
+            >
+              <span
+                className={cn(
+                  "absolute inset-y-0 left-0 bg-accent-500 transition-[width] duration-700 ease-out",
+                  inView ? "w-full" : "w-0",
+                )}
+              />
+            </span>
+            <span className="eyebrow text-muted">{label}</span>
+          </div>
 
-        {/* Content column — children gate their own entrance via <Reveal>. */}
-        <ScreenInViewContext.Provider value={inView}>
-          <div className="mx-auto w-full max-w-4xl">{children}</div>
-        </ScreenInViewContext.Provider>
+          {/* Content column — children gate their own entrance via <Reveal>. */}
+          <ScreenInViewContext.Provider value={inView}>
+            <div className="w-full">{children}</div>
+          </ScreenInViewContext.Provider>
+        </div>
       </section>
     );
   },

@@ -168,13 +168,13 @@ export function LearnDeck() {
 
   return (
     <DeckContext.Provider value={ctx}>
-      <div className="relative h-[calc(100svh-3rem)] bg-surface-2 p-2 sm:p-4">
+      <div className="relative h-[calc(100svh-3rem)] bg-bg">
         <div
           ref={deckRef}
-          // The deck fills the padded frame. The warm-paper "slide window" sits
-          // on a slightly darker mat with a hairline border + soft shadow, so it
-          // reads as a distinct presentation surface, not just the page.
-          className="snap-deck h-full rounded-2xl border border-line-strong bg-bg shadow-card outline-none"
+          // The deck is a BORDERLESS scroll window — no outer boundary around the
+          // whole navigator. Each slide instead carries its own hairline-framed
+          // content panel (see DeckScreen), so the frame reads per-slide.
+          className="snap-deck h-full bg-bg outline-none"
           tabIndex={-1}
           aria-roledescription="carousel"
           aria-label="Learn module presentation"
