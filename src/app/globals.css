@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  AI Skills Workshop — design tokens (Tailwind CSS v4 @theme).
+  Aesthetic: polished modern "AI workbench". Light base, ONE strong accent
+  (indigo-leaning blue — credible/enterprise, deliberately not generic-AI purple),
+  a neutral slate ramp, semantic ok/warn/error, and dark code/preview panes.
+
+  Tokens are consumed as Tailwind utilities everywhere (bg-accent, text-fg,
+  border-line, rounded-card, shadow-card, font-mono, etc). DO NOT hard-code
+  color literals in components — add a token here instead.
+*/
+
+@theme {
+  /* ---- Fonts (wired from next/font CSS vars in layout.tsx) ---- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---- Neutral ramp (warm-cool slate) ---- */
+  --color-neutral-50: oklch(98.4% 0.003 247);
+  --color-neutral-100: oklch(96.7% 0.005 247);
+  --color-neutral-200: oklch(92.6% 0.008 247);
+  --color-neutral-300: oklch(86.5% 0.012 247);
+  --color-neutral-400: oklch(70.5% 0.016 247);
+  --color-neutral-500: oklch(58.5% 0.018 247);
+  --color-neutral-600: oklch(47.5% 0.018 247);
+  --color-neutral-700: oklch(38.5% 0.017 247);
+  --color-neutral-800: oklch(27.5% 0.018 255);
+  --color-neutral-900: oklch(20.5% 0.02 260);
+  --color-neutral-950: oklch(14.5% 0.02 264);
+
+  /* ---- Accent (one strong accent) ---- */
+  --color-accent-50: oklch(97% 0.014 256);
+  --color-accent-100: oklch(93.5% 0.03 256);
+  --color-accent-200: oklch(88% 0.06 256);
+  --color-accent-300: oklch(80% 0.1 257);
+  --color-accent-400: oklch(70% 0.14 259);
+  --color-accent-500: oklch(62% 0.17 262);
+  --color-accent-600: oklch(55% 0.19 264);
+  --color-accent-700: oklch(48% 0.18 265);
+  --color-accent-800: oklch(41% 0.15 266);
+  --color-accent-900: oklch(35% 0.12 266);
+
+  /* ---- Semantic ---- */
+  --color-ok-50: oklch(96% 0.03 152);
+  --color-ok-500: oklch(64% 0.15 152);
+  --color-ok-600: oklch(56% 0.14 152);
+  --color-ok-700: oklch(48% 0.12 152);
+
+  --color-warn-50: oklch(97% 0.04 85);
+  --color-warn-500: oklch(76% 0.15 75);
+  --color-warn-600: oklch(68% 0.16 65);
+  --color-warn-700: oklch(56% 0.15 60);
+
+  --color-error-50: oklch(96.5% 0.025 17);
+  --color-error-500: oklch(62% 0.21 21);
+  --color-error-600: oklch(55% 0.22 22);
+  --color-error-700: oklch(48% 0.2 22);
+
+  /* ---- Semantic surface aliases (light theme defaults) ---- */
+  --color-bg: var(--color-neutral-50);
+  --color-surface: oklch(100% 0 0);
+  --color-surface-2: var(--color-neutral-100);
+  --color-fg: var(--color-neutral-900);
+  --color-muted: var(--color-neutral-500);
+  --color-line: var(--color-neutral-200);
+  --color-line-strong: var(--color-neutral-300);
+
+  /* Dark panel surface (code / preview panes — same in both color schemes) */
+  --color-panel: var(--color-neutral-950);
+  --color-panel-2: var(--color-neutral-900);
+  --color-panel-fg: var(--color-neutral-100);
+  --color-panel-muted: var(--color-neutral-400);
+  --color-panel-line: oklch(100% 0 0 / 0.08);
+
+  /* ---- Radius ---- */
+  --radius-card: 0.875rem;
+  --radius-control: 0.625rem;
+  --radius-pill: 9999px;
+
+  /* ---- Shadow ---- */
+  --shadow-card: 0 1px 2px oklch(20% 0.02 260 / 0.04),
+    0 4px 16px oklch(20% 0.02 260 / 0.06);
+  --shadow-pop: 0 8px 30px oklch(20% 0.02 260 / 0.12);
+  --shadow-focus: 0 0 0 3px var(--color-accent-200);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/*
+  Dark mode is class-based ([data-theme="dark"]) so the workbench chrome can be
+  toggled deterministically. Code/preview panes stay dark regardless.
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+[data-theme="dark"] {
+  --color-bg: var(--color-neutral-950);
+  --color-surface: var(--color-neutral-900);
+  --color-surface-2: var(--color-neutral-800);
+  --color-fg: var(--color-neutral-100);
+  --color-muted: var(--color-neutral-400);
+  --color-line: oklch(100% 0 0 / 0.08);
+  --color-line-strong: oklch(100% 0 0 / 0.14);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Consistent, accent-tinted focus ring across the kit. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-200);
+    color: var(--color-neutral-900);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Respect reduced-motion globally — kit components use `transition`/`animate`. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
