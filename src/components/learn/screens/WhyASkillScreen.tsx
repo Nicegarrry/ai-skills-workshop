@@ -46,7 +46,7 @@ export function WhyASkillScreen() {
         <Reveal
           as="h2"
           delay={60}
-          className="font-serif text-4xl font-semibold leading-tight tracking-tight text-fg sm:text-5xl"
+          className="font-serif text-3xl font-semibold leading-tight tracking-tight text-fg sm:text-4xl md:text-5xl"
         >
           Why a <span className="italic">skill</span>, not just a{" "}
           <span className="mark-amber">prompt?</span>
@@ -54,7 +54,7 @@ export function WhyASkillScreen() {
         <Reveal
           as="p"
           delay={120}
-          className="max-w-2xl text-lg leading-relaxed text-muted"
+          className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg"
         >
           A one-off prompt lives in your head — you retype it every time and
           Cowork forgets it the moment the conversation ends. A skill is a

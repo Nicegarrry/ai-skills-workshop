@@ -132,7 +132,7 @@ function FolderTree({
 
   const row = "flex items-center gap-1.5 px-1.5 py-1 font-mono text-[12px]";
   return (
-    <div className="rounded-control border border-line bg-surface p-3 shadow-card">
+    <div className="min-w-0 overflow-x-auto rounded-control border border-line bg-surface p-3 shadow-card">
       <p className="eyebrow mb-2 text-muted">Click a file to preview</p>
       <ul className="space-y-0.5">
         <li className={cn(row, "text-muted")}>
@@ -195,7 +195,7 @@ export function SkillAnatomyScreen() {
         <Reveal
           as="h2"
           delay={60}
-          className="font-serif text-4xl font-semibold leading-tight tracking-tight text-fg sm:text-5xl"
+          className="font-serif text-3xl font-semibold leading-tight tracking-tight text-fg sm:text-4xl md:text-5xl"
         >
           A skill is a <span className="mark">folder</span>.
         </Reveal>
@@ -211,11 +211,11 @@ export function SkillAnatomyScreen() {
         </Reveal>
       </div>
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,300px)_1fr]">
-        <Reveal delay={200}>
+      <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,300px)_1fr]">
+        <Reveal delay={200} className="min-w-0">
           <FolderTree selected={selected} onSelect={setSelected} />
         </Reveal>
-        <Reveal delay={280}>
+        <Reveal delay={280} className="min-w-0 overflow-hidden">
           {/* Keyed so it re-mounts (and fades) when you pick a different file. */}
           <div key={selected} className="animate-fade-in">
             <CodePane

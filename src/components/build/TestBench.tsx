@@ -25,7 +25,7 @@
  * the latest edits. The result is mode-labelled ("Demo mode" vs "Live"); MOCK
  * carries a subtle note + the demo callout. Loading + error states preserved.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useLayoutEffect, type RefObject } from "react";
 import { Callout, Field, TextField } from "@/components/ui";
 import {
   CoworkFrame,
@@ -116,6 +116,13 @@ export function TestBench({
   // synchronous setState-in-effect cascade).
   const pendingResultRef = useRef<LastResult | null>(null);
 
+  // Ref for the result block so we can scroll it into view after it lands.
+  const resultRef = useRef<HTMLDivElement | null>(null);
+
+  // Track the previous result timestamp so auto-scroll only fires on a genuinely
+  // NEW result — not on mount/return with a persisted result from localStorage.
+  const prevAtRef = useRef<number | null>(null);
+
   // The discovery name shown in the working steps + trace line — parsed from the
   // actual SKILL.md frontmatter so it always matches what the model received.
   const loadedName = parseFrontmatter(skillMd).name?.trim() || skill.name || "your-skill";
@@ -156,6 +163,42 @@ export function TestBench({
 
   // Abort any in-flight request on unmount.
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Scroll the result into view when a genuinely NEW result lands.
+  // Gate: only fires when `lastResult.at` changes from a prior non-null value —
+  // skips the initial mount/return with a persisted result (prevAtRef is null on
+  // first render, so we record the existing timestamp without scrolling).
+  // Uses scrollTop on the transcript container rather than scrollIntoView so that
+  // only the internal overflow-y-auto container scrolls, not the page/window.
+  useLayoutEffect(() => {
+    const currentAt = lastResult?.at ?? null;
+    const previousAt = prevAtRef.current;
+
+    if (previousAt !== null && currentAt !== null && currentAt !== previousAt) {
+      // A new result arrived after a prior one was already shown — scroll the
+      // result div into view within its nearest scrollable ancestor only.
+      if (resultRef.current) {
+        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const scrollable = resultRef.current.closest<HTMLElement>(
+          "[data-transcript-scroll]",
+        );
+        if (scrollable) {
+          scrollable.scrollTo({
+            top: scrollable.scrollHeight,
+            behavior: mq.matches ? "instant" : "smooth",
+          });
+        } else {
+          // Fallback: scrollIntoView with block:nearest keeps page movement minimal.
+          resultRef.current.scrollIntoView({
+            behavior: mq.matches ? "instant" : "smooth",
+            block: "nearest",
+          });
+        }
+      }
+    }
+
+    prevAtRef.current = currentAt;
+  }, [lastResult]);
 
   const run = useCallback(async () => {
     abortRef.current?.abort();
@@ -340,7 +383,7 @@ export function TestBench({
           aria-atomic="false"
         >
           <CoworkFrame
-            className="h-full min-h-[28rem]"
+            className="min-h-[26rem] lg:h-[calc(100vh-7rem)] lg:max-h-[56rem]"
             headerAside={
               loading ? (
                 <CoworkStatusChip variant="in-progress" />
@@ -370,6 +413,7 @@ export function TestBench({
               loadedName={loadedName}
               hasRun={hasRun}
               onRetry={() => void run()}
+              resultRef={resultRef}
             />
           </CoworkFrame>
 
@@ -403,6 +447,7 @@ function CoworkTranscript({
   loadedName,
   hasRun,
   onRetry,
+  resultRef,
 }: {
   instruction: string;
   steps: string[];
@@ -413,6 +458,7 @@ function CoworkTranscript({
   loadedName: string;
   hasRun: boolean;
   onRetry: () => void;
+  resultRef: RefObject<HTMLDivElement | null>;
 }) {
   const trimmedInstruction = instruction.trim();
 
@@ -475,7 +521,7 @@ function CoworkTranscript({
 
       {/* Result: the finished email as a readable, wrapping assistant turn */}
       {!loading && !error && result && (
-        <CoworkResult result={result} loadedName={loadedName} hasRun={hasRun} />
+        <CoworkResult result={result} loadedName={loadedName} hasRun={hasRun} containerRef={resultRef} />
       )}
     </>
   );
@@ -487,16 +533,18 @@ function CoworkResult({
   result,
   loadedName,
   hasRun,
+  containerRef,
 }: {
   result: LastResult;
   loadedName: string;
   hasRun: boolean;
+  containerRef: RefObject<HTMLDivElement | null>;
 }) {
   const isMock = result.mode === "mock";
 
   return (
     <CoworkMessage role="assistant">
-      <div className="flex flex-col gap-3">
+      <div ref={containerRef} className="flex flex-col gap-3">
         {/* Discovery trace + run status — reinforces the discovery model */}
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-cw-muted">
           <span>Loaded</span>

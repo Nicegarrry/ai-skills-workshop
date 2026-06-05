@@ -39,77 +39,89 @@ export function Stepper({
   const isCompleted = (index: number, id: string) =>
     completedIds ? completedIds.includes(id) : index < currentIndex;
 
+  const currentStep = steps[currentIndex];
+
   return (
-    <nav aria-label="Progress" className={cn("w-full", className)}>
-      <ol className="flex items-center">
-        {steps.map((step, index) => {
-          const completed = isCompleted(index, step.id);
-          const current = step.id === currentId;
-          const clickable = !!onStepClick && (completed || current);
+    <nav aria-label="Progress" className={cn("w-full min-w-0", className)}>
+      {/* Dot rail — horizontally scrollable on phones so it never blows the page */}
+      <div className="-my-1 overflow-x-auto py-1">
+        <ol className="flex min-w-0 items-center">
+          {steps.map((step, index) => {
+            const completed = isCompleted(index, step.id);
+            const current = step.id === currentId;
+            const clickable = !!onStepClick && (completed || current);
 
-          const dot = (
-            <span
-              className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill border text-sm font-semibold transition-colors",
-                completed && "border-accent-600 bg-accent-600 text-white",
-                current &&
-                  "border-accent-600 bg-surface text-accent-700 ring-4 ring-accent-100",
-                !completed &&
-                  !current &&
-                  "border-line-strong bg-surface text-muted",
-              )}
-            >
-              {completed ? (
-                <CheckIcon className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                index + 1
-              )}
-            </span>
-          );
-
-          return (
-            <li
-              key={step.id}
-              className={cn(
-                "flex items-center",
-                index < steps.length - 1 && "flex-1",
-              )}
-            >
-              <div className="flex items-center gap-2.5">
-                {clickable ? (
-                  <button
-                    type="button"
-                    onClick={() => onStepClick?.(step.id)}
-                    aria-current={current ? "step" : undefined}
-                    className="flex items-center gap-2.5 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
-                  >
-                    {dot}
-                    <StepLabel label={step.label} active={current || completed} />
-                  </button>
-                ) : (
-                  <div
-                    className="flex items-center gap-2.5"
-                    aria-current={current ? "step" : undefined}
-                  >
-                    {dot}
-                    <StepLabel label={step.label} active={current} />
-                  </div>
+            const dot = (
+              <span
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill border text-sm font-semibold transition-colors",
+                  completed && "border-accent-600 bg-accent-600 text-white",
+                  current &&
+                    "border-accent-600 bg-surface text-accent-700 ring-4 ring-accent-100",
+                  !completed &&
+                    !current &&
+                    "border-line-strong bg-surface text-muted",
                 )}
-              </div>
+              >
+                {completed ? (
+                  <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  index + 1
+                )}
+              </span>
+            );
 
-              {index < steps.length - 1 && (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "mx-3 hidden h-px flex-1 sm:block",
-                    completed ? "bg-accent-400" : "bg-line",
+            return (
+              <li
+                key={step.id}
+                className={cn(
+                  "flex items-center",
+                  index < steps.length - 1 && "flex-1",
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  {clickable ? (
+                    <button
+                      type="button"
+                      onClick={() => onStepClick?.(step.id)}
+                      aria-current={current ? "step" : undefined}
+                      className="flex items-center gap-2.5 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                    >
+                      {dot}
+                      <StepLabel label={step.label} active={current || completed} />
+                    </button>
+                  ) : (
+                    <div
+                      className="flex items-center gap-2.5"
+                      aria-current={current ? "step" : undefined}
+                    >
+                      {dot}
+                      <StepLabel label={step.label} active={current} />
+                    </div>
                   )}
-                />
-              )}
-            </li>
-          );
-        })}
-      </ol>
+                </div>
+
+                {index < steps.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "mx-3 hidden h-px flex-1 sm:block",
+                      completed ? "bg-accent-400" : "bg-line",
+                    )}
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+
+      {/* Current step label — shown only on phones (< sm) below the dot rail */}
+      {currentStep && (
+        <p className="mt-2 text-center text-sm font-medium text-fg sm:hidden">
+          {currentStep.label}
+        </p>
+      )}
     </nav>
   );
 }

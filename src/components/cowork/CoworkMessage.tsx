@@ -40,10 +40,10 @@ export function CoworkMessage({
 }: CoworkMessageProps) {
   if (role === "user") {
     return (
-      <div className={cn("flex justify-end gap-2.5", className)}>
+      <div className={cn("flex min-w-0 justify-end gap-2.5", className)}>
         <div
           className={cn(
-            "max-w-[85%] rounded-lg bg-cw-user px-3.5 py-2.5",
+            "min-w-0 max-w-[85%] rounded-lg bg-cw-user px-3.5 py-2.5",
             "font-fluent text-sm leading-relaxed text-cw-text",
             "whitespace-pre-wrap break-words",
           )}
@@ -64,7 +64,7 @@ export function CoworkMessage({
   }
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <div className="flex items-center gap-1.5">
         <Sparkle size={16} secondary={false} />
         <span className="cw-grad-text font-fluent text-xs font-semibold">
@@ -73,7 +73,7 @@ export function CoworkMessage({
       </div>
       <div
         className={cn(
-          "pl-[22px] font-fluent text-sm leading-relaxed text-cw-text",
+          "min-w-0 pl-[22px] font-fluent text-sm leading-relaxed text-cw-text",
           "whitespace-pre-wrap break-words",
         )}
       >

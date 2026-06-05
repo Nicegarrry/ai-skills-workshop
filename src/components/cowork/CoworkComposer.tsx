@@ -68,14 +68,15 @@ export function CoworkComposer({
   return (
     <div
       className={cn(
-        "group flex items-end gap-2 rounded-xl border bg-cw-surface px-3 py-2.5",
+        "group flex items-end gap-1.5 rounded-xl border bg-cw-surface px-2.5 py-2",
         "border-cw-line shadow-cw transition-colors duration-150",
         "focus-within:border-cw-brand focus-within:ring-2 focus-within:ring-cw-brand/25",
+        "sm:gap-2 sm:px-3 sm:py-2.5",
         disabled && "opacity-60",
         className,
       )}
     >
-      <Sparkle size={18} className="mb-1.5" />
+      <Sparkle size={18} className="mb-1.5 shrink-0" />
       <label htmlFor={inputId} className="sr-only">
         Message Copilot
       </label>
@@ -89,7 +90,7 @@ export function CoworkComposer({
         disabled={disabled}
         aria-disabled={disabled || undefined}
         className={cn(
-          "max-h-40 min-h-[1.5rem] flex-1 resize-none bg-transparent py-1",
+          "max-h-40 min-h-[1.5rem] min-w-0 flex-1 resize-none bg-transparent py-1",
           "font-fluent text-sm leading-relaxed text-cw-text",
           "placeholder:text-cw-muted focus:outline-none disabled:cursor-not-allowed",
         )}
@@ -100,9 +101,10 @@ export function CoworkComposer({
         aria-hidden="true"
         disabled={disabled}
         className={cn(
-          "mb-0.5 grid h-8 w-8 place-items-center rounded-control text-cw-muted",
+          "mb-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-control text-cw-muted",
           "transition-colors hover:bg-cw-brand-tint hover:text-cw-brand",
           "disabled:pointer-events-none disabled:opacity-50",
+          "sm:h-8 sm:w-8",
         )}
       >
         <PaperClipIcon className="h-5 w-5" />
@@ -114,9 +116,10 @@ export function CoworkComposer({
         disabled={!canSend}
         aria-label="Send message"
         className={cn(
-          "mb-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full",
+          "mb-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-full",
           "transition-colors duration-150",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cw-brand",
+          "sm:h-8 sm:w-8",
           canSend
             ? "bg-cw-brand text-white hover:bg-cw-brand-hover"
             : "cursor-not-allowed bg-cw-line text-cw-muted",

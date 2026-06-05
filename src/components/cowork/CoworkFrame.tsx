@@ -63,10 +63,10 @@ export function CoworkFrame({
       )}
     >
       {/* Office-native header */}
-      <header className="flex items-center justify-between gap-3 border-b border-cw-line-soft bg-cw-surface px-4 py-2.5">
+      <header className="flex items-center justify-between gap-2 border-b border-cw-line-soft bg-cw-surface px-3 py-2.5 sm:gap-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2">
           <Sparkle size={18} />
-          <span className="text-sm font-semibold tracking-tight text-cw-text">
+          <span className="shrink-0 text-sm font-semibold tracking-tight text-cw-text">
             Copilot
           </span>
           {subtitle ? (
@@ -75,7 +75,7 @@ export function CoworkFrame({
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {headerAside}
           <span
             className={cn(
@@ -90,7 +90,7 @@ export function CoworkFrame({
       </header>
 
       {/* Body: optional collapsed rail + chat canvas */}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         {showRail ? (
           <nav
             className="hidden w-12 shrink-0 flex-col items-center gap-4 border-r border-cw-line-soft bg-cw-bg py-4 sm:flex"
@@ -110,10 +110,10 @@ export function CoworkFrame({
           </nav>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 flex-col bg-cw-surface">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-cw-surface">
           <div
             className={cn(
-              "min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6",
+              "min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-5",
               bodyClassName,
             )}
           >
@@ -123,7 +123,7 @@ export function CoworkFrame({
           </div>
 
           {composer ? (
-            <div className="border-t border-cw-line-soft bg-cw-surface px-4 py-3 sm:px-6">
+            <div className="shrink-0 border-t border-cw-line-soft bg-cw-surface px-3 py-3 sm:px-6">
               <div className="mx-auto w-full max-w-2xl">{composer}</div>
             </div>
           ) : null}

@@ -28,7 +28,7 @@ export function IntroScreen() {
       <Reveal
         as="h1"
         delay={60}
-        className="font-serif text-5xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl lg:text-7xl"
+        className="font-serif text-4xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-5xl md:text-6xl lg:text-7xl"
       >
         Learn just enough.
         <br />
@@ -38,7 +38,7 @@ export function IntroScreen() {
       <Reveal
         as="p"
         delay={140}
-        className="max-w-2xl text-lg leading-relaxed text-muted sm:text-xl"
+        className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg md:text-xl"
       >
         A five-minute tour of Microsoft&nbsp;365 Copilot Cowork skills — what
         they are, why they beat one-off prompts, and what a{" "}

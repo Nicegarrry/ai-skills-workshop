@@ -55,18 +55,22 @@ export const DeckScreen = forwardRef<HTMLElement, DeckScreenProps>(
         aria-roledescription="slide"
         aria-label={`${label} — slide ${index + 1} of ${total}`}
         className={cn(
-          "snap-screen relative flex min-h-full flex-col justify-center",
-          "px-4 py-6 sm:px-8 sm:py-8 lg:px-12",
+          // Mobile: natural height — content determines section size (snap is
+          // off below lg so no mandatory-snap trap). lg+: min-h-full so each
+          // section fills the fixed-height snap container for one-per-viewport.
+          "snap-screen relative flex flex-col justify-center",
+          "py-6 lg:min-h-full",
+          "px-3 sm:px-8 lg:px-12",
           className,
         )}
       >
         {/* Each slide's CONTENT AREA sits in its own hairline-framed panel — the
             boundary reads per-slide, not around the whole deck/navigator. */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col rounded-2xl border border-line bg-surface/70 px-6 py-7 shadow-card sm:px-10 sm:py-9">
+        <div className="mx-auto flex w-full max-w-4xl min-w-0 flex-col rounded-2xl border border-line bg-surface/70 px-4 py-5 shadow-card sm:px-8 sm:py-7 lg:px-10 lg:py-9">
           {/* Slide counter + section eyebrow — top chrome of each slide. */}
           <div
             className={cn(
-              "flex w-full items-center gap-3 pb-6",
+              "flex w-full items-center gap-3 pb-4 sm:pb-6",
               "transition-all duration-500 ease-out",
               inView ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0",
             )}
@@ -89,9 +93,14 @@ export const DeckScreen = forwardRef<HTMLElement, DeckScreenProps>(
             <span className="eyebrow text-muted">{label}</span>
           </div>
 
-          {/* Content column — children gate their own entrance via <Reveal>. */}
+          {/* Content column — children gate their own entrance via <Reveal>.
+              min-w-0 prevents unbreakable content from blowing out the flex
+              parent. overflow-x-auto (not hidden) lets any inner code/pre block
+              that is wider than the panel scroll horizontally within this div
+              rather than being silently clipped — page blowout is still
+              contained because min-w-0 stops this div itself from growing. */}
           <ScreenInViewContext.Provider value={inView}>
-            <div className="w-full">{children}</div>
+            <div className="w-full min-w-0 overflow-x-auto">{children}</div>
           </ScreenInViewContext.Provider>
         </div>
       </section>

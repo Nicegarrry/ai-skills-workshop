@@ -47,7 +47,7 @@ export function MeetCoworkScreen() {
         <Reveal
           as="h2"
           delay={60}
-          className="font-serif text-4xl font-semibold leading-tight tracking-tight text-fg sm:text-5xl"
+          className="font-serif text-3xl font-semibold leading-tight tracking-tight text-fg sm:text-4xl md:text-5xl"
         >
           An <span className="mark">agentic coworker</span>, not a chatbot.
         </Reveal>
@@ -65,7 +65,8 @@ export function MeetCoworkScreen() {
 
       <Reveal delay={200}>
         <Card padded={false} className="overflow-hidden">
-          <table className="w-full text-left text-sm sm:text-base">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[36rem] text-left text-sm sm:text-base">
             <thead>
               <tr className="border-b border-line bg-surface-2">
                 <th scope="col" className="py-3 pl-5 pr-4 font-semibold text-fg">
@@ -94,6 +95,7 @@ export function MeetCoworkScreen() {
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       </Reveal>
 

@@ -62,7 +62,7 @@ export function BuildingBlocksScreen() {
         <Reveal
           as="h2"
           delay={60}
-          className="font-serif text-4xl font-semibold leading-tight tracking-tight text-fg sm:text-5xl"
+          className="font-serif text-3xl font-semibold leading-tight tracking-tight text-fg sm:text-4xl md:text-5xl"
         >
           Prompt <span className="text-muted">→</span> <span className="mark">Skill</span>{" "}
           <span className="text-muted">→</span> Agent

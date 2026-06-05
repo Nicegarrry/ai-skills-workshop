@@ -153,7 +153,7 @@ export function SkillStep({ skill, voice, onChange }: SkillStepProps) {
         </div>
 
         {/* Live preview */}
-        <div className="flex flex-col gap-2 lg:sticky lg:top-6 lg:self-start">
+        <div className="flex min-w-0 flex-col gap-2 lg:sticky lg:top-6 lg:self-start">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium uppercase tracking-wide text-muted">
               Live preview

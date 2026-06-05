@@ -51,7 +51,7 @@ export function CoworkWorking({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border border-cw-line bg-cw-surface shadow-cw",
+        "min-w-0 overflow-hidden rounded-lg border border-cw-line bg-cw-surface shadow-cw",
         className,
       )}
     >
@@ -105,6 +105,7 @@ export function CoworkWorking({
                   </span>
                   <span
                     className={cn(
+                      "min-w-0 break-words",
                       state === "done" && "text-cw-muted",
                       state === "active" && "font-medium text-cw-text",
                       state === "pending" && "text-cw-muted",
