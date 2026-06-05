@@ -153,14 +153,30 @@ function FolderTree({
               <ul className="ml-2 space-y-0.5 border-l border-line pl-2">
                 <li>{fileRow("skill")}</li>
                 <li>{fileRow("voice")}</li>
+                {/* Other things a skill folder CAN hold — greyed; most skills omit them. */}
+                <li className={cn(row, "text-muted/55")}>
+                  <FolderIcon className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+                  <span className="flex-1">tools/</span>
+                  <span className="font-sans text-[10px] opacity-80">optional</span>
+                </li>
+                <li className={cn(row, "text-muted/55")}>
+                  <DocumentTextIcon className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+                  <span className="flex-1">README.md</span>
+                </li>
+                <li className={cn(row, "text-muted/55")}>
+                  <FolderIcon className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+                  <span className="flex-1">scripts/</span>
+                  <span className="font-sans text-[10px] opacity-80">custom code</span>
+                </li>
               </ul>
             </li>
           </ul>
         </li>
       </ul>
       <p className="mt-2.5 text-xs leading-relaxed text-muted">
-        A skill is just a <span className="font-medium text-fg">folder</span>: one{" "}
-        <code className="font-mono">SKILL.md</code> plus any files it references.
+        Most skills are just a <span className="font-medium text-fg">SKILL.md</span>{" "}
+        (+ a file like voice.md). A folder <em>can</em> also hold tools, a README,
+        or custom code — greyed above — but most don&rsquo;t need them.
       </p>
     </div>
   );

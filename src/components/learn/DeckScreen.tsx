@@ -55,17 +55,34 @@ export const DeckScreen = forwardRef<HTMLElement, DeckScreenProps>(
         aria-roledescription="slide"
         aria-label={`${label} — slide ${index + 1} of ${total}`}
         className={cn(
-          "snap-screen relative flex min-h-[calc(100svh-3.5rem)] flex-col justify-center",
-          "px-5 py-16 sm:px-8 lg:px-12",
+          "snap-screen relative flex min-h-full flex-col justify-center",
+          "px-5 py-12 sm:px-10 lg:px-14",
           className,
         )}
       >
         {/* Slide counter + section eyebrow — top chrome of each slide. */}
-        <div className="mx-auto flex w-full max-w-4xl items-center gap-3 pb-8">
+        <div
+          className={cn(
+            "mx-auto flex w-full max-w-4xl items-center gap-3 pb-8",
+            "transition-all duration-500 ease-out",
+            inView ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0",
+          )}
+        >
           <span className="eyebrow text-accent-600/70">
             {pad(index + 1)}&nbsp;/&nbsp;{pad(total)}
           </span>
-          <span className="h-px flex-1 bg-line" aria-hidden="true" />
+          {/* Hairline that "draws" in sapphire as the slide arrives. */}
+          <span
+            className="relative h-px flex-1 overflow-hidden bg-line"
+            aria-hidden="true"
+          >
+            <span
+              className={cn(
+                "absolute inset-y-0 left-0 bg-accent-500 transition-[width] duration-700 ease-out",
+                inView ? "w-full" : "w-0",
+              )}
+            />
+          </span>
           <span className="eyebrow text-muted">{label}</span>
         </div>
 

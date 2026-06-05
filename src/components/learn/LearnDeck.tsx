@@ -168,11 +168,13 @@ export function LearnDeck() {
 
   return (
     <DeckContext.Provider value={ctx}>
-      <div className="relative flex-1">
+      <div className="relative h-[calc(100svh-3rem)] bg-surface-2 p-2 sm:p-4">
         <div
           ref={deckRef}
-          // Each screen fills the area below the sticky h-14 (3.5rem) Nav.
-          className="snap-deck h-[calc(100svh-3.5rem)] outline-none"
+          // The deck fills the padded frame. The warm-paper "slide window" sits
+          // on a slightly darker mat with a hairline border + soft shadow, so it
+          // reads as a distinct presentation surface, not just the page.
+          className="snap-deck h-full rounded-2xl border border-line-strong bg-bg shadow-card outline-none"
           tabIndex={-1}
           aria-roledescription="carousel"
           aria-label="Learn module presentation"

@@ -78,11 +78,20 @@ export function Nav() {
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500",
           )}
         >
-          {/* Sapphire accent pip */}
-          <span
-            className="h-1.5 w-4 rounded-pill bg-accent-600 shrink-0"
+          {/* Qubit mark (logo only — the name is never used) */}
+          <svg
+            viewBox="0 0 64 64"
+            className="h-5 w-5 shrink-0 text-accent-600"
+            fill="none"
             aria-hidden="true"
-          />
+          >
+            <g stroke="currentColor" strokeWidth="3.2">
+              <rect x="8" y="8" width="22" height="22" />
+              <rect x="34" y="8" width="22" height="22" />
+              <rect x="8" y="34" width="22" height="22" />
+              <rect x="34" y="34" width="22" height="22" fill="currentColor" stroke="none" />
+            </g>
+          </svg>
           <span
             className={cn(
               "font-serif text-base tracking-tight text-fg",

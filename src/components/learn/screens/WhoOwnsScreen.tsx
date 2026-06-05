@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
   CheckBadgeIcon,
   ShieldExclamationIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 import { Reveal } from "../Reveal";
 
@@ -74,7 +75,21 @@ export function WhoOwnsScreen() {
         ))}
       </ul>
 
-      <Reveal delay={440}>
+      <Reveal delay={400}>
+        <div className="flex items-start gap-3 rounded-control border border-line bg-surface-2 px-5 py-3">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-accent-100 text-accent-700">
+            <BuildingOffice2Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <p className="text-sm leading-relaxed text-fg sm:text-base">
+            <span className="font-semibold">Skills vs agents — who owns them.</span>{" "}
+            A skill is usually <em>one person&rsquo;s</em> — the expert closest to
+            that task. Agents tend to run team- or enterprise-wide, with central
+            governance and approval behind them.
+          </p>
+        </div>
+      </Reveal>
+
+      <Reveal delay={500}>
         <Callout
           tone="warn"
           title="The portable-format bonus"

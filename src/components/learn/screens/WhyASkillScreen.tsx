@@ -11,6 +11,8 @@ import {
   ArrowPathIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import { Sparkle } from "@/components/cowork";
+import { cn } from "@/lib/cn";
 import { Reveal } from "../Reveal";
 
 const POINTS = [
@@ -28,8 +30,8 @@ const POINTS = [
   },
   {
     icon: MagnifyingGlassIcon,
-    title: "Auto-discovered",
-    body: "Cowork reads the skill's description and loads it automatically when the task matches — no slash command, no menu.",
+    title: "Two ways to run it",
+    body: "Cowork loads it automatically when a task matches its description — or call it on demand by typing / and picking it from the Skills menu.",
     iconClass: "bg-accent-100 text-accent-700",
   },
 ] as const;
@@ -79,16 +81,64 @@ export function WhyASkillScreen() {
         ))}
       </div>
 
-      <Reveal
-        delay={460}
-        as="p"
-        className="text-base font-medium text-muted sm:text-lg"
-      >
-        Bottom line:{" "}
-        <span className="text-fg">
-          write the skill once, use it on every draft, forever.
-        </span>
+      <Reveal delay={460}>
+        <div className="grid items-center gap-5 rounded-card border border-line bg-surface-2 p-5 sm:grid-cols-[1fr_auto]">
+          <div>
+            <p className="text-base font-medium text-fg sm:text-lg">
+              Call it on demand with a slash command.
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              In Cowork, type <code className="font-mono text-[13px]">/</code>,
+              open <span className="font-medium text-fg">Skills</span>, pick your
+              skill, and add any extra context — then hit enter.
+            </p>
+          </div>
+          <SlashMock />
+        </div>
       </Reveal>
+    </div>
+  );
+}
+
+/** A faithful little mock of invoking a skill on demand in Cowork: type "/", the
+ *  Skills menu appears, pick one. Illustrative (Register B / Fluent tokens). */
+function SlashMock() {
+  const skills = ["email-in-my-voice", "weekly-report", "meeting-notes"];
+  return (
+    <div className="w-full rounded-xl border border-cw-line bg-cw-surface p-2 font-fluent shadow-cw-pop sm:w-72">
+      <div className="overflow-hidden rounded-lg border border-cw-line-soft">
+        <p className="border-b border-cw-line-soft bg-cw-bg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-cw-muted">
+          Skills
+        </p>
+        <ul className="py-1">
+          {skills.map((s, i) => (
+            <li
+              key={s}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5",
+                i === 0 && "bg-cw-brand-tint",
+              )}
+            >
+              <Sparkle size={14} secondary={false} />
+              <span
+                className={cn(
+                  "font-mono text-[12px]",
+                  i === 0 ? "text-cw-text" : "text-cw-muted",
+                )}
+              >
+                {s}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-2 flex items-center gap-2 rounded-lg border border-cw-line px-3 py-2">
+        <Sparkle size={16} secondary={false} />
+        <span className="font-mono text-sm text-cw-text">
+          /email
+          <span className="ml-px inline-block h-4 w-px animate-pulse bg-cw-text align-middle" />
+        </span>
+      </div>
     </div>
   );
 }
