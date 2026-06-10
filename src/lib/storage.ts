@@ -1,5 +1,8 @@
 import {
   BUILD_STEPS,
+  DEFAULT_MAX_WORDS,
+  MAX_MAX_WORDS,
+  MIN_MAX_WORDS,
   type BuildStepId,
   type WorkshopState,
 } from "@/lib/types";
@@ -40,6 +43,7 @@ export function createInitialState(
     voice: voiceFieldsFromScenario(scenario),
     draft: scenario.sampleDraft,
     instruction: scenario.sampleCommand,
+    maxWords: DEFAULT_MAX_WORDS,
     lastResult: null,
   };
 }
@@ -109,6 +113,13 @@ function coerceState(raw: unknown): WorkshopState | null {
     draft: typeof obj.draft === "string" ? obj.draft : base.draft,
     instruction:
       typeof obj.instruction === "string" ? obj.instruction : base.instruction,
+    maxWords:
+      typeof obj.maxWords === "number" &&
+      Number.isFinite(obj.maxWords) &&
+      obj.maxWords >= MIN_MAX_WORDS &&
+      obj.maxWords <= MAX_MAX_WORDS
+        ? Math.round(obj.maxWords)
+        : base.maxWords,
     lastResult,
   };
 }

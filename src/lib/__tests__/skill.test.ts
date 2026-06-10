@@ -387,6 +387,28 @@ describe("buildRunPrompt", () => {
     expect(system).toContain("finished email");
     expect(system).toContain("no commentary");
   });
+
+  it("adds a word-budget instruction when maxWords is provided", () => {
+    const { system } = buildRunPrompt({
+      skillMd: assembleSkillMd(VALID_SKILL),
+      voiceMd: assembleVoiceMd(VALID_VOICE),
+      draft: "test",
+      instruction: "/skill go",
+      maxWords: 180,
+    });
+    expect(system).toContain("180 words");
+    expect(system).toContain("never stop mid-sentence");
+  });
+
+  it("omits the word-budget instruction when maxWords is absent", () => {
+    const { system } = buildRunPrompt({
+      skillMd: assembleSkillMd(VALID_SKILL),
+      voiceMd: assembleVoiceMd(VALID_VOICE),
+      draft: "test",
+      instruction: "/skill go",
+    });
+    expect(system).not.toContain("words or fewer");
+  });
 });
 
 // ---------------------------------------------------------------------------

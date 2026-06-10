@@ -246,9 +246,11 @@ export default function BuildPage() {
             voiceMd={voiceMd}
             draft={state.draft}
             instruction={state.instruction}
+            maxWords={state.maxWords}
             lastResult={state.lastResult}
             onDraftChange={(draft) => patch({ draft })}
             onInstructionChange={(instruction) => patch({ instruction })}
+            onMaxWordsChange={(maxWords) => patch({ maxWords })}
             onSkillChange={patchSkill}
             onVoiceChange={patchVoice}
             onResult={handleResult}

@@ -42,12 +42,14 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { parseFrontmatter } from "@/lib/skill";
-import type {
-  LastResult,
-  RunSkillRequest,
-  RunSkillResponse,
-  SkillFields,
-  VoiceFields,
+import {
+  MAX_MAX_WORDS,
+  MIN_MAX_WORDS,
+  type LastResult,
+  type RunSkillRequest,
+  type RunSkillResponse,
+  type SkillFields,
+  type VoiceFields,
 } from "@/lib/types";
 
 export type TestBenchProps = {
@@ -58,9 +60,11 @@ export type TestBenchProps = {
   voiceMd: string;
   draft: string;
   instruction: string;
+  maxWords: number;
   lastResult: LastResult | null;
   onDraftChange: (value: string) => void;
   onInstructionChange: (value: string) => void;
+  onMaxWordsChange: (value: number) => void;
   onSkillChange: (patch: Partial<SkillFields>) => void;
   onVoiceChange: (patch: Partial<VoiceFields>) => void;
   onResult: (result: LastResult) => void;
@@ -92,9 +96,11 @@ export function TestBench({
   voiceMd,
   draft,
   instruction,
+  maxWords,
   lastResult,
   onDraftChange,
   onInstructionChange,
+  onMaxWordsChange,
   onSkillChange,
   onVoiceChange,
   onResult,
@@ -219,6 +225,7 @@ export function TestBench({
         draft,
         instruction,
         scenarioId,
+        maxWords,
       };
       const res = await fetch("/api/run-skill", {
         method: "POST",
@@ -271,7 +278,7 @@ export function TestBench({
         abortRef.current = null;
       }
     }
-  }, [skillMd, voiceMd, draft, instruction, scenarioId, reveal]);
+  }, [skillMd, voiceMd, draft, instruction, scenarioId, maxWords, reveal]);
 
   const hasRun = !!lastResult;
   const showComposerSubmit = useCallback(() => void run(), [run]);
@@ -365,6 +372,7 @@ export function TestBench({
                   onVoiceChange({ toneDescription: e.target.value })
                 }
               />
+              <MaxWordsField value={maxWords} onChange={onMaxWordsChange} />
             </div>
           )}
 
@@ -432,6 +440,67 @@ export function TestBench({
         </div>
       </div>
     </div>
+  );
+}
+
+/* ---------- Response-length control ---------- */
+
+/** Clamp a candidate word budget into the allowed range. */
+function clampMaxWords(n: number): number {
+  return Math.min(MAX_MAX_WORDS, Math.max(MIN_MAX_WORDS, Math.round(n)));
+}
+
+/**
+ * Number input for the response word budget. Buffers keystrokes locally so the
+ * learner can type freely (e.g. "300" without "3" snapping to the minimum), and
+ * commits a clamped, valid value on blur / Enter. Stays in sync if `value`
+ * changes elsewhere (e.g. a scenario re-seed or Start over).
+ */
+function MaxWordsField({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const [draftValue, setDraftValue] = useState(String(value));
+
+  // Re-sync the local buffer when the committed value changes externally (e.g. a
+  // scenario re-seed or Start over). Done during render via a tracked previous
+  // value — the project's pattern for deriving from props without an effect.
+  const [lastValue, setLastValue] = useState(value);
+  if (value !== lastValue) {
+    setLastValue(value);
+    setDraftValue(String(value));
+  }
+
+  const commit = useCallback(() => {
+    const parsed = Number(draftValue);
+    const next = Number.isFinite(parsed) ? clampMaxWords(parsed) : value;
+    setDraftValue(String(next));
+    if (next !== value) onChange(next);
+  }, [draftValue, value, onChange]);
+
+  return (
+    <Field
+      label="response length (max words)"
+      hint={`Cowork is told to finish the email within this budget — ${MIN_MAX_WORDS}–${MAX_MAX_WORDS} words.`}
+      type="number"
+      inputMode="numeric"
+      min={MIN_MAX_WORDS}
+      max={MAX_MAX_WORDS}
+      step={10}
+      value={draftValue}
+      onChange={(e) => setDraftValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit();
+        }
+      }}
+      className="sm:max-w-[12rem]"
+    />
   );
 }
 

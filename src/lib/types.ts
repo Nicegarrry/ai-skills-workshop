@@ -56,6 +56,17 @@ export type RunSkillError = {
 
 export type RunSkillResponse = RunSkillSuccess | RunSkillError;
 
+/**
+ * Response-length budget (words) for the generated email.
+ *
+ * Sent in the run-skill request so the model is told to finish within the
+ * budget — keeps the email a sensible length AND lets the route size its token
+ * headroom from it, so the response is never hard-truncated mid-sentence.
+ */
+export const DEFAULT_MAX_WORDS = 250;
+export const MIN_MAX_WORDS = 50;
+export const MAX_MAX_WORDS = 600;
+
 /** Request body for `POST /api/run-skill`. */
 export type RunSkillRequest = {
   skillMd: string;
@@ -63,6 +74,8 @@ export type RunSkillRequest = {
   draft: string;
   instruction: string;
   scenarioId?: string;
+  /** Soft word budget for the generated email. Defaults to DEFAULT_MAX_WORDS. */
+  maxWords?: number;
 };
 
 /** The result last seen in the test bench (persisted so a refresh restores it). */
@@ -104,6 +117,8 @@ export type WorkshopState = {
   draft: string;
   /** The (editable) slash-command instruction in the test bench. */
   instruction: string;
+  /** Soft word budget for the generated email (test-bench length control). */
+  maxWords: number;
   /** The most recent test-bench result, if any. */
   lastResult: LastResult | null;
 };

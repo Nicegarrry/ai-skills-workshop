@@ -277,8 +277,15 @@ export function buildRunPrompt(args: {
   voiceMd: string;
   draft: string;
   instruction: string;
+  /** Soft word budget — when set, the model is asked to finish within it. */
+  maxWords?: number;
 }): { system: string; user: string } {
-  const { skillMd, voiceMd, draft, instruction } = args;
+  const { skillMd, voiceMd, draft, instruction, maxWords } = args;
+
+  const lengthGuidance =
+    typeof maxWords === "number" && maxWords > 0
+      ? `Keep the whole email to roughly ${maxWords} words or fewer. Always finish the message with a complete sign-off — never stop mid-sentence.`
+      : null;
 
   const system = [
     "You are Microsoft 365 Copilot Cowork.",
@@ -295,6 +302,7 @@ export function buildRunPrompt(args: {
     "",
     "Apply the skill faithfully to the user's request.",
     "Output only the finished email (subject line, body, sign-off) — no commentary, no preamble, no explanation.",
+    ...(lengthGuidance ? [lengthGuidance] : []),
   ].join("\n");
 
   const user = [

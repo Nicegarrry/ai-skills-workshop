@@ -19,7 +19,12 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { buildRunPrompt, mockRun } from "@/lib/skill";
-import type { RunSkillResponse } from "@/lib/types";
+import {
+  DEFAULT_MAX_WORDS,
+  MAX_MAX_WORDS,
+  MIN_MAX_WORDS,
+  type RunSkillResponse,
+} from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Vercel function timeout
@@ -49,6 +54,12 @@ const RunSkillBodySchema = z.object({
     .string()
     .max(MAX_INSTRUCTION_CHARS, "instruction exceeds 1 KB limit"),
   scenarioId: z.string().optional(),
+  maxWords: z
+    .number()
+    .int()
+    .min(MIN_MAX_WORDS, `maxWords must be at least ${MIN_MAX_WORDS}`)
+    .max(MAX_MAX_WORDS, `maxWords must be at most ${MAX_MAX_WORDS}`)
+    .optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -156,9 +167,16 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const { skillMd, voiceMd, draft, instruction } = parsed.data;
+  const maxWords = parsed.data.maxWords ?? DEFAULT_MAX_WORDS;
 
   // --- build prompt ---
-  const { system, user } = buildRunPrompt({ skillMd, voiceMd, draft, instruction });
+  const { system, user } = buildRunPrompt({
+    skillMd,
+    voiceMd,
+    draft,
+    instruction,
+    maxWords,
+  });
 
   // --- provider dispatch ---
   const mode = selectProvider();
@@ -181,11 +199,17 @@ export async function POST(request: Request): Promise<Response> {
     const model =
       mode === "anthropic" ? anthropic(modelId) : google(modelId);
 
+    // Size the hard token cap from the word budget with generous headroom (~2
+    // tokens/word + overhead for the subject line and formatting), so the model
+    // can always finish the email within `maxWords` instead of being cut off
+    // mid-sentence the way a fixed 700-token cap did. Ceiling keeps cost bounded.
+    const maxOutputTokens = Math.min(2000, Math.ceil(maxWords * 2) + 256);
+
     const result = await generateText({
       model,
       system,
       prompt: user,
-      maxOutputTokens: 700,
+      maxOutputTokens,
       temperature: 0.3,
     });
 
