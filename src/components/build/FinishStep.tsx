@@ -4,8 +4,9 @@
  * FinishStep — step 5 of the lab.
  *
  * Recaps what the learner built, reminds them of the four building blocks and
- * the honest governance note, then offers individual Blob downloads of SKILL.md
- * and voice.md (no zip dependency) plus the real OneDrive install path. "Start
+ * the honest governance note, then offers downloads — a one-click skill folder
+ * .zip (built in-browser via a dependency-free writer) plus the individual
+ * SKILL.md / voice.md files — alongside the real OneDrive install path. "Start
  * over" clears persisted state via the parent.
  */
 import { useCallback } from "react";
@@ -25,6 +26,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { parseFrontmatter } from "@/lib/skill";
+import { createZipBlob } from "@/lib/zip";
 import { cn } from "@/lib/cn";
 
 export type FinishStepProps = {
@@ -35,9 +37,8 @@ export type FinishStepProps = {
   onStartOver: () => void;
 };
 
-/** Trigger a client-side download of `text` as a named file (no deps). */
-function downloadText(filename: string, text: string): void {
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+/** Trigger a client-side download of a Blob under `filename` (no deps). */
+function downloadBlob(filename: string, blob: Blob): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -47,6 +48,14 @@ function downloadText(filename: string, text: string): void {
   a.remove();
   // Revoke on the next tick so the download has time to start.
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/** Trigger a client-side download of `text` as a named markdown file. */
+function downloadText(filename: string, text: string): void {
+  downloadBlob(
+    filename,
+    new Blob([text], { type: "text/markdown;charset=utf-8" }),
+  );
 }
 
 const BUILDING_BLOCKS: { term: string; gloss: string }[] = [
@@ -73,6 +82,16 @@ export function FinishStep({
     () => downloadText("voice.md", voiceMd),
     [voiceMd],
   );
+  // Package both files in a skill-named folder so the archive unzips into a
+  // ready-to-install skill directory (e.g. my-skill/SKILL.md) — the shape
+  // Claude's skill uploader and Cowork's OneDrive folder both expect.
+  const downloadZip = useCallback(() => {
+    const blob = createZipBlob([
+      { name: `${name}/SKILL.md`, content: skillMd },
+      { name: `${name}/voice.md`, content: voiceMd },
+    ]);
+    downloadBlob(`${name}.zip`, blob);
+  }, [name, skillMd, voiceMd]);
 
   return (
     <div className="flex animate-fade-up flex-col gap-7">
@@ -102,16 +121,26 @@ export function FinishStep({
           <CardTitle>Download your files</CardTitle>
         </CardHeader>
         <CardBody className="text-fg">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button variant="primary" onClick={downloadSkill}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button variant="primary" onClick={downloadZip}>
               <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />
-              Download SKILL.md
+              Download skill (.zip)
+            </Button>
+            <Button variant="secondary" onClick={downloadSkill}>
+              <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />
+              SKILL.md
             </Button>
             <Button variant="secondary" onClick={downloadVoice}>
               <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />
-              Download voice.md
+              voice.md
             </Button>
           </div>
+          <p className="mt-2 text-sm text-muted">
+            The <code className="font-mono">.zip</code> contains a{" "}
+            <code className="font-mono">{name}/</code> folder with both files —
+            unzip it straight into your skills directory, or upload the zip to
+            Claude as a skill. Prefer the raw files? Grab them individually.
+          </p>
 
           <div className="mt-5 flex flex-col gap-2">
             <p className="text-sm font-medium text-fg">Then install them</p>

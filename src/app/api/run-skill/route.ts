@@ -199,11 +199,15 @@ export async function POST(request: Request): Promise<Response> {
     const model =
       mode === "anthropic" ? anthropic(modelId) : google(modelId);
 
-    // Size the hard token cap from the word budget with generous headroom (~2
-    // tokens/word + overhead for the subject line and formatting), so the model
-    // can always finish the email within `maxWords` instead of being cut off
-    // mid-sentence the way a fixed 700-token cap did. Ceiling keeps cost bounded.
-    const maxOutputTokens = Math.min(2000, Math.ceil(maxWords * 2) + 256);
+    // Size the hard token cap from the word budget with generous headroom.
+    // English averages ~0.75 words/token, so `maxWords` words only need ~1.4x
+    // tokens — we allow ~4x plus a high fixed floor so the model can ALWAYS
+    // finish the email (sign-off included) rather than stopping after a
+    // sentence or two, even when it spends some budget on internal reasoning.
+    const maxOutputTokens = Math.min(
+      4000,
+      Math.max(1500, Math.ceil(maxWords * 4) + 400),
+    );
 
     const result = await generateText({
       model,
